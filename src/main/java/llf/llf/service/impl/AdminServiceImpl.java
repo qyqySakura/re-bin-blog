@@ -1,9 +1,9 @@
 package llf.llf.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import llf.llf.mapper.AdminMapper;
 import llf.llf.pojo.Admin;
 import llf.llf.service.AdminService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

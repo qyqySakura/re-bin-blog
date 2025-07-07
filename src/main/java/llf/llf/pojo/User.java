@@ -6,14 +6,13 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class Admin {
-    // 属性定义
+public class User {
     private Integer id;
 
     private String name;
 
-    private String username;
-
+    private String username
+            ;
     private String password;
 
     private String email;
