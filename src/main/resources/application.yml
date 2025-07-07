@@ -1,0 +1,17 @@
+server:
+  port: 9090
+
+# 数据库配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 2004
+    url: jdbc:mysql://localhost:3306/llf?useUnicode=true&characterEncoding=utf-8
+
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    mapUnderscoreToCamelCase: true
+  mapper-locations: classpath:mapper/*.xml
