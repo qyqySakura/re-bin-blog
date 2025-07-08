@@ -1,5 +1,6 @@
 package llf.llf.controller;
 
+import llf.llf.common.Result;
 import llf.llf.pojo.Admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,31 +17,33 @@ public class AdminController {
 
     // 查询所有管理员
     @GetMapping
-    public List<Admin> getAllAdmins() {
-        return adminService.selectAll();
+    public Result<List<Admin>> getAllAdmins() {
+        return Result.success(adminService.selectAll());
     }
 
     // 根据ID查询管理员
     @GetMapping("/{id}")
-    public Admin getAdminById(@PathVariable Integer id) {
-        return adminService.selectById(id);
+    public Result<Admin>getAdminById(@PathVariable Integer id)
+    {
+        return Result.success(adminService.selectById(id));
     }
 
     // 新增管理员
     @PostMapping("/add")
-    public int createAdmin(@RequestBody Admin admin) {
-        return adminService.add(admin);
+    public Result<Integer> createAdmin(@RequestBody Admin admin) {
+        return Result.success(adminService.add(admin));
     }
+
 
     // 更新管理员
     @PutMapping("/update")
-    public int updateAdmin(@RequestBody Admin admin) {
-        return adminService.update(admin);
+    public Result<Integer> updateAdmin(@RequestBody Admin admin) {
+        return Result.success(adminService.update(admin));
     }
 
     // 删除管理员
     @DeleteMapping("/del/{id}")
-    public int deleteAdmin(@PathVariable Integer id) {
-        return adminService.deleteById(id);
+    public Result<Integer> deleteAdmin(@PathVariable Integer id) {
+        return Result.success(adminService.deleteById(id));
     }
 }

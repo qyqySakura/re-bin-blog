@@ -1,8 +1,8 @@
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+!vue/fronted/src/main/**/target/
+!vue/fronted/src/test/**/target/
 
 ### STS ###
 .apt_generated
@@ -26,8 +26,8 @@ target/
 /nbdist/
 /.nb-gradle/
 build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+!vue/fronted/src/main/**/build/
+!vue/fronted/src/test/**/build/
 
 ### VS Code ###
 .vscode/
