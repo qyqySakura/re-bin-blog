@@ -6,10 +6,25 @@ import Login from '../views/login.vue'
 import store from '../store'
 
 const routes = [
-  { path: '/', redirect: '/login' },
-  { path: '/login', component: Login },
-  { path: '/users', component: UserList },
-  { path: '/admins', component: AdminList }
+  { 
+    path: '/', 
+    redirect: '/users' 
+  },
+  { 
+    path: '/login', 
+    component: Login,
+    meta: { requiresAuth: false }
+  },
+  { 
+    path: '/users', 
+    component: UserList,
+    meta: { requiresAuth: true, title: '用户管理' }
+  },
+  { 
+    path: '/admins', 
+    component: AdminList,
+    meta: { requiresAuth: true, title: '管理员管理' }
+  }
 ]
 
 const router = createRouter({
@@ -21,8 +36,15 @@ router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const isAuthenticated = store.getters.isAuthenticated
 
+  // 设置页面标题
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - 后台管理系统`
+  }
+
   if (requiresAuth && !isAuthenticated) {
     next('/login')
+  } else if (to.path === '/login' && isAuthenticated) {
+    next('/users')
   } else {
     next()
   }

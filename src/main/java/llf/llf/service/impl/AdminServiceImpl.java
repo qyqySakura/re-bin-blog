@@ -40,4 +40,9 @@ public class AdminServiceImpl implements AdminService {
     public int deleteById(Integer id) {
         return adminMapper.deleteById(id);
     }
+
+    @Override
+    public Admin login(String username, String password) {
+        return adminMapper.login(username, password);
+    }
 }

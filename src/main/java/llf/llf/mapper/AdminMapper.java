@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import llf.llf.pojo.Admin;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -20,13 +21,16 @@ public interface AdminMapper extends BaseMapper<Admin> {
 
     List<Admin> selectAll();
 
-    Admin selectById();
+    Admin selectById(@Param("id") Integer id);
 
-    int add(Admin  admin);
+    int add(Admin admin);
 
-    int update(Admin  admin);
+    int update(Admin admin);
 
-    int deleteById();
+    int deleteById(@Param("id") Integer id);
+
+    // 登录验证方法
+    Admin login(@Param("username") String username, @Param("password") String password);
 }
 
 

@@ -2,11 +2,14 @@ package llf.llf.controller;
 
 import llf.llf.common.Result;
 import llf.llf.pojo.Admin;
+import llf.llf.common.JwtUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admins")
@@ -14,6 +17,24 @@ public class AdminController {
 
     @Autowired
     private llf.llf.service.AdminService adminService;
+
+    // 登录认证接口
+    @PostMapping("/auth/login")
+    public Result<Map<String, Object>> login(@RequestBody Admin admin) {
+        Admin foundAdmin = adminService.login(admin.getUsername(), admin.getPassword());
+        if (foundAdmin != null) {
+            // 生成JWT token
+            String token = JwtUtil.generateToken(foundAdmin.getUsername());
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("token", token);
+            result.put("user", foundAdmin);
+            
+            return Result.success(result);
+        } else {
+            return Result.error(400, "用户名或密码错误");
+        }
+    }
 
     // 查询所有管理员
     @GetMapping

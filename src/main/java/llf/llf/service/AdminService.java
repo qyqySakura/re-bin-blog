@@ -20,4 +20,7 @@ public interface AdminService {
     int update(Admin admin);
 
     int deleteById(Integer id);
+
+    // 登录验证方法
+    Admin login(String username, String password);
 }
