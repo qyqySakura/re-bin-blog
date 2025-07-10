@@ -33,6 +33,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public int update(Admin admin) {
+        System.out.println("Service层更新: " + admin);
         return adminMapper.update(admin);
     }
 

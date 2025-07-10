@@ -39,4 +39,9 @@ public class UserServiceImpl implements UserService {
     public int deleteById(Integer id) {
         return userMapper.deleteById(id);
     }
+    
+    @Override
+    public User login(String username, String password) {
+        return userMapper.login(username, password);
+    }
 }

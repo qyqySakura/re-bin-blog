@@ -43,4 +43,8 @@
     <select id="selectById" parameterType="int" resultType="llf.llf.pojo.User">
         SELECT * FROM user WHERE id = #{id}
     </select>
+    
+    <select id="login" resultType="llf.llf.pojo.User">
+        SELECT * FROM user WHERE username = #{username} AND password = #{password}
+    </select>
 </mapper>

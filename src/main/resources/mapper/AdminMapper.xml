@@ -25,9 +25,15 @@
         values (#{name},#{username},#{password},#{email},#{phone},#{avatar})
     </insert>
 
-    <update id="update">
-        update admin set name=#{name},username=#{username},password=#{password},email=#{email},phone=#{phone},avatar=#{avatar}
-        where id=#{id}
+    <update id="update" parameterType="llf.llf.pojo.Admin">
+        UPDATE admin
+        SET name = #{name},
+            username = #{username},
+            password = #{password},
+            email = #{email},
+            phone = #{phone},
+            avatar = #{avatar}
+        WHERE id = #{id}
     </update>
 
     <delete id="deleteById">

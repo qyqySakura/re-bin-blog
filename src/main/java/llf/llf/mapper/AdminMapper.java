@@ -6,6 +6,7 @@ import llf.llf.pojo.Admin;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -31,6 +32,10 @@ public interface AdminMapper extends BaseMapper<Admin> {
 
     // 登录验证方法
     Admin login(@Param("username") String username, @Param("password") String password);
+
+    // 头像专用更新
+    @Update("UPDATE admin SET avatar = #{avatarUrl} WHERE id = #{id}")
+    int updateAvatar(@Param("id") Integer id, @Param("avatarUrl") String avatarUrl);
 }
 
 

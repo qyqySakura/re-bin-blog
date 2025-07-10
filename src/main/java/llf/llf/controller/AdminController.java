@@ -2,7 +2,7 @@ package llf.llf.controller;
 
 import llf.llf.common.Result;
 import llf.llf.pojo.Admin;
-import llf.llf.common.JwtUtil;
+import llf.llf.common.SaTokenUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +23,11 @@ public class AdminController {
     public Result<Map<String, Object>> login(@RequestBody Admin admin) {
         Admin foundAdmin = adminService.login(admin.getUsername(), admin.getPassword());
         if (foundAdmin != null) {
-            // 生成JWT token
-            String token = JwtUtil.generateToken(foundAdmin.getUsername());
+            // 使用Sa-Token登录
+            SaTokenUtil.login(foundAdmin.getId(), "admin");
             
             Map<String, Object> result = new HashMap<>();
-            result.put("token", token);
+            result.put("token", SaTokenUtil.getTokenValue());
             result.put("user", foundAdmin);
             
             return Result.success(result);
@@ -59,6 +59,7 @@ public class AdminController {
     // 更新管理员
     @PutMapping("/update")
     public Result<Integer> updateAdmin(@RequestBody Admin admin) {
+        System.out.println("收到更新请求: " + admin);
         return Result.success(adminService.update(admin));
     }
 
@@ -66,5 +67,12 @@ public class AdminController {
     @DeleteMapping("/del/{id}")
     public Result<Integer> deleteAdmin(@PathVariable Integer id) {
         return Result.success(adminService.deleteById(id));
+    }
+    
+    // 退出登录
+    @PostMapping("/auth/logout")
+    public Result<String> logout() {
+        SaTokenUtil.logout("admin");
+        return Result.success("退出登录成功");
     }
 }

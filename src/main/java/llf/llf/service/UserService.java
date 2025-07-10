@@ -15,4 +15,7 @@ public interface UserService {
     int update(User user);
 
     int deleteById(Integer id);
+    
+    // 登录验证方法
+    User login(String username, String password);
 }

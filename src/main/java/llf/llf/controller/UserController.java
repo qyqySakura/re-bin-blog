@@ -3,11 +3,14 @@ package llf.llf.controller;
 import llf.llf.common.BusinessException;
 import llf.llf.pojo.User;
 import llf.llf.service.UserService;
+import llf.llf.common.SaTokenUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import llf.llf.common.Result;
 
@@ -17,6 +20,24 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    // 用户登录接口
+    @PostMapping("/auth/login")
+    public Result<Map<String, Object>> login(@RequestBody User user) {
+        User foundUser = userService.login(user.getUsername(), user.getPassword());
+        if (foundUser != null) {
+            // 使用Sa-Token登录
+            SaTokenUtil.login(foundUser.getId(), "user");
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("token", SaTokenUtil.getTokenValue());
+            result.put("user", foundUser);
+            
+            return Result.success(result);
+        } else {
+            return Result.error(400, "用户名或密码错误");
+        }
+    }
 
     // 查询所有用户
     @GetMapping
@@ -49,6 +70,13 @@ public class UserController {
     @DeleteMapping("/del/{id}")
     public Result<Integer> deleteUser(@PathVariable Integer id) {
         return Result.success(userService.deleteById(id));
+    }
+    
+    // 退出登录
+    @PostMapping("/auth/logout")
+    public Result<String> logout() {
+        SaTokenUtil.logout("user");
+        return Result.success("退出登录成功");
     }
 }
 
