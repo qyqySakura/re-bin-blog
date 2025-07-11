@@ -7,6 +7,8 @@ import llf.llf.common.SaTokenUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 import java.util.List;
 import java.util.HashMap;
@@ -20,6 +22,15 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    // 发送邮箱验证码
+    @PostMapping("/sendCode")
+    public Result<String> sendEmailCode(@RequestParam String email) {
+        userService.generateAndSendEmailCode(email);
+        return Result.success("验证码已发送");
+    }
+
+
 
     // 用户登录接口
     @PostMapping("/auth/login")
@@ -51,9 +62,14 @@ public class UserController {
         return Result.success(userService.selectById(id));
     }
 
-    // 新增用户
+    // 新增用户（带验证码校验）
     @PostMapping("/add")
-    public Result<Integer> createUser(@RequestBody User user) {
+    public Result<Integer> createUser(@RequestBody User user, @RequestParam String code) {
+        String cachedCode = llf.llf.common.EmailCodeCache.get(user.getEmail());
+        if (cachedCode == null || !cachedCode.equals(code)) {
+            return Result.error(400, "验证码错误或已过期");
+        }
+        llf.llf.common.EmailCodeCache.remove(user.getEmail());
         if (user.getUsername() == null || user.getUsername().isEmpty()) {
             throw new BusinessException("用户名不能为空");
         }

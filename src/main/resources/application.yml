@@ -10,11 +10,28 @@ spring:
     url: jdbc:mysql://localhost:3306/llf?useUnicode=true&characterEncoding=utf-8
 
 
+  mail:
+    host: smtp.qq.com
+    username: 3035526940@qq.com
+    password: kelaldumaqpfdhdd
+    port: 587
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 mybatis:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     mapUnderscoreToCamelCase: true
   mapper-locations: classpath:mapper/*.xml
+
+# 其它配置...
+
 
 # Sa-Token配置
 sa-token:

@@ -198,14 +198,6 @@ async function submitForm() {
   }
 }
 
-// async function onAvatarChange(e, role) {
-//   const file = e.target.files[0]
-//   if (!file || !form.value.id) return
-//   const url = await uploadAvatar(file, role, form.value.id)
-//   form.value.avatar = url
-//   ElMessage.success('头像上传成功')
-// }
-// 重构onAvatarChange方法
 function onAvatarChange(e) {
   const file = e.target.files[0]
   if (!file) return

@@ -1,4 +1,4 @@
-package llf.llf.common;
+package llf.llf.aremove;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;

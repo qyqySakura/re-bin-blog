@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface UserService {
 
+String generateAndSendEmailCode(String email);
+
     List<User> selectAll();
 
     User selectById(Integer id);
