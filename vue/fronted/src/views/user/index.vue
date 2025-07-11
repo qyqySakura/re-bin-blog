@@ -161,11 +161,6 @@ async function submitForm() {
   try {
     await formRef.value.validate()
     submitLoading.value = true
-    // // 保护avatar字段，防止被null覆盖
-    // if (form.value.id && (form.value.avatar === undefined || form.value.avatar === null)) {
-    //   form.value.avatar = editingUser.value ? editingUser.value.avatar : null
-    // }
-
     if (avatarFile.value) {
       const url = await uploadAvatar(
         avatarFile.value,
