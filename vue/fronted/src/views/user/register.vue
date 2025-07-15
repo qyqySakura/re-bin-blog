@@ -88,7 +88,7 @@ async function getCode() {
   }
   codeLoading.value = true
   try {
-    await request.post('/users/sendCode', null, { params: { email: form.value.email } })
+    await request.post('/user/sendEmailCode', { email: form.value.email })
     ElMessage.success('验证码已发送')
     codeCountdown.value = 60
     codeTimer = setInterval(() => {
@@ -106,7 +106,7 @@ async function register() {
   await formRef.value.validate()
   loading.value = true
   try {
-    const res = await request.post('/users/add', {
+    const res = await request.post('/user/add', {
       username: form.value.username,
       password: form.value.password,
       email: form.value.email

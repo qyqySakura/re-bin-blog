@@ -7,13 +7,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 2004
-    url: jdbc:mysql://localhost:3306/llf?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://localhost:3306/llf?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
 
 
   mail:
     host: smtp.qq.com
-    username: 3035526940@qq.com
-    password: kelaldumaqpfdhdd
+    username: 2692433610@qq.com  # 请修改为你的邮箱
+    password: jvbmianqmhqbdhce # 请修改为你的邮箱授权码
     port: 587
     protocol: smtp
     default-encoding: UTF-8
@@ -23,6 +23,25 @@ spring:
           auth: true
           starttls:
             enable: true
+          ssl:
+            trust: smtp.qq.com
+
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:  # 如果Redis设置了密码，请在这里填写
+      database: 0  # 使用数据库0
+      timeout: 10000ms
+      connect-timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8   # 连接池最大连接数
+          max-wait: -1ms  # 连接池最大阻塞等待时间
+          max-idle: 8     # 连接池中的最大空闲连接
+          min-idle: 2     # 连接池中的最小空闲连接
+        shutdown-timeout: 100ms
 
 mybatis:
   configuration:
@@ -49,6 +68,12 @@ sa-token:
   token-style: uuid
   # 是否输出操作日志
   is-log: true
+  # 使用Redis存储
+  alone-redis:
+    # Redis数据库索引
+    database: 1
+    # key前缀
+    key-prefix: "satoken:"
 
 
 

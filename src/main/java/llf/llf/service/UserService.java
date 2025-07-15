@@ -8,6 +8,8 @@ public interface UserService {
 
 String generateAndSendEmailCode(String email);
 
+    boolean verifyEmailCode(String email, String code);
+
     List<User> selectAll();
 
     User selectById(Integer id);

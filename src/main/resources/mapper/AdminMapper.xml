@@ -20,7 +20,7 @@
         avatar
     </sql>
 
-    <insert id="add">
+    <insert id="add" parameterType="llf.llf.pojo.Admin" useGeneratedKeys="true" keyProperty="id">
         insert into admin (name,username,password,email,phone,avatar)
         values (#{name},#{username},#{password},#{email},#{phone},#{avatar})
     </insert>

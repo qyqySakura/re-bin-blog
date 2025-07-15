@@ -90,6 +90,7 @@ CREATE TABLE `category` (
 
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
+INSERT INTO `category` VALUES (1,'技术分享','分享技术相关的文章'),(2,'生活随笔','记录生活中的点点滴滴'),(3,'学习笔记','学习过程中的心得体会');
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -121,6 +122,11 @@ CREATE TABLE `comment` (
 
 LOCK TABLES `comment` WRITE;
 /*!40000 ALTER TABLE `comment` DISABLE KEYS */;
+INSERT INTO `comment` VALUES
+(1,1,2,'很棒的博客，期待更多精彩内容！',NULL,'2025-01-01 11:00:00'),
+(2,2,2,'这个Spring Boot教程很实用，谢谢分享！',NULL,'2025-01-02 15:00:00'),
+(3,2,1,'谢谢支持！后续会继续更新更多教程。',2,'2025-01-02 16:00:00'),
+(4,3,1,'生活需要用心感受，很有感触的文章。',NULL,'2025-01-03 19:00:00');
 /*!40000 ALTER TABLE `comment` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -181,6 +187,10 @@ CREATE TABLE `post` (
 
 LOCK TABLES `post` WRITE;
 /*!40000 ALTER TABLE `post` DISABLE KEYS */;
+INSERT INTO `post` VALUES
+(1,1,1,'欢迎来到我的博客','这是我的第一篇博客文章，欢迎大家来到我的个人博客！在这里我会分享技术心得、生活感悟和学习笔记。','欢迎来到我的博客，这里会分享各种有趣的内容',NULL,1,'2025-01-01 10:00:00','2025-01-01 10:00:00'),
+(2,1,1,'Spring Boot 入门指南','Spring Boot 是一个基于 Spring 框架的快速开发框架，它简化了 Spring 应用的配置和部署过程。本文将介绍如何快速上手 Spring Boot 开发。','Spring Boot 快速入门教程，适合初学者',NULL,1,'2025-01-02 14:30:00','2025-01-02 14:30:00'),
+(3,2,2,'今天的生活感悟','生活就像一杯茶，需要慢慢品味。今天在公园散步时，看到了美丽的夕阳，让我想起了很多美好的回忆。','记录今天的生活感悟和心情',NULL,1,'2025-01-03 18:00:00','2025-01-03 18:00:00');
 /*!40000 ALTER TABLE `post` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -207,6 +217,7 @@ CREATE TABLE `post_tag` (
 
 LOCK TABLES `post_tag` WRITE;
 /*!40000 ALTER TABLE `post_tag` DISABLE KEYS */;
+INSERT INTO `post_tag` VALUES (1,1),(1,2),(2,1),(2,2),(2,6),(3,7);
 /*!40000 ALTER TABLE `post_tag` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -231,6 +242,7 @@ CREATE TABLE `tag` (
 
 LOCK TABLES `tag` WRITE;
 /*!40000 ALTER TABLE `tag` DISABLE KEYS */;
+INSERT INTO `tag` VALUES (1,'Java'),(2,'Spring Boot'),(3,'Vue.js'),(4,'MySQL'),(5,'前端'),(6,'后端'),(7,'全栈开发');
 /*!40000 ALTER TABLE `tag` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -249,6 +261,9 @@ CREATE TABLE `user` (
   `email` varchar(100) NOT NULL,
   `phone` varchar(50) DEFAULT NULL,
   `avatar` varchar(255) DEFAULT NULL,
+  `status` tinyint DEFAULT '1' COMMENT '状态 1-正常 0-禁用',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
@@ -262,7 +277,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'彬彬','9966337','123','1234556667@qq.com','1234567890',NULL),(2,'bb','sakura','123123','123123@qq.com','123123',NULL);
+INSERT INTO `user` VALUES (1,'彬彬','9966337','123','1234556667@qq.com','1234567890',NULL,1,'2025-01-01 10:00:00','2025-01-01 10:00:00'),(2,'bb','sakura','123123','123123@qq.com','123123',NULL,1,'2025-01-01 10:00:00','2025-01-01 10:00:00');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

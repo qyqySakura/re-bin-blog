@@ -6,6 +6,14 @@
         <span class="logo-text">后台管理</span>
       </div>
       <el-menu :default-active="$route.path" class="sidebar-menu" router background-color="#fff" text-color="#222" active-text-color="#fff">
+        <el-menu-item index="/admin/posts">
+          <el-icon><i-ep-Document /></el-icon>
+          <span>文章管理</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/categories">
+          <el-icon><i-ep-Folder /></el-icon>
+          <span>分类管理</span>
+        </el-menu-item>
         <el-menu-item index="/admin/users">
           <el-icon><i-ep-UserFilled /></el-icon>
           <span>用户管理</span>

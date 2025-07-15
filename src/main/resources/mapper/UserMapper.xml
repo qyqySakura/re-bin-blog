@@ -10,15 +10,19 @@
         <result property="email" column="email" jdbcType="VARCHAR"/>
         <result property="phone" column="phone" jdbcType="VARCHAR"/>
         <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, name, username, password, email, phone, avatar
+        id, name, username, password, email, phone, avatar, status, create_time, update_time
     </sql>
 
-    <insert id="add">
-        INSERT INTO user (name, username, password, email, phone, avatar)
-        VALUES (#{name}, #{username}, #{password}, #{email}, #{phone}, #{avatar})
+    <insert id="add" parameterType="llf.llf.pojo.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (name, username, password, email, phone, avatar, status, create_time, update_time)
+        VALUES (#{name}, #{username}, #{password}, #{email}, #{phone}, #{avatar},
+                COALESCE(#{status}, 1), NOW(), NOW())
     </insert>
 
     <update id="update">
@@ -28,7 +32,9 @@
             password = #{password},
             email = #{email},
             phone = #{phone},
-            avatar = #{avatar}
+            avatar = #{avatar},
+            status = #{status},
+            update_time = NOW()
         WHERE id = #{id}
     </update>
 

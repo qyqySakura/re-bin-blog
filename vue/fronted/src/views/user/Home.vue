@@ -1,160 +1,1194 @@
 <template>
-  <div class="blog-home-bg">
-    <!-- 粒子背景（可选 vue-particles 或 canvas） -->
-    <div id="particles-bg"></div>
-
+  <div class="modern-blog">
     <!-- 顶部导航 -->
-    <header class="blog-header">
-      <div class="logo">RE-BIN</div>
-      <nav class="nav-menu">
-        <a href="#">首页</a>
-        <a href="#">归档</a>
-        <a href="#">其他</a>
-        <a href="#">友链</a>
-        <a href="#">音乐</a>
-        <a href="#">相册</a>
-      </nav>
-      <div class="header-actions">
-        <el-switch v-model="isDark" active-icon="Moon" inactive-icon="Sunny" />
-        <el-input class="search-input" placeholder="搜索" prefix-icon="Search" />
-        <el-button class="login-btn" @click="$router.push('/user/login')">登录</el-button>
-      </div>
-    </header>
+    <nav class="top-navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <router-link to="/" class="brand-link">
+            <div class="brand-logo">
+              <span class="logo-text">RE-BIN</span>
+              <span class="logo-subtitle">个人博客</span>
+            </div>
+          </router-link>
+        </div>
 
-    <!-- Banner区 -->
-    <section class="blog-banner">
-      <h1 class="main-title">RE-BIN</h1>
-      <div class="subtitle-bar">
-        <span>无聊的并不是时间，而是平庸无奇的我。</span>
+        <div class="nav-menu">
+          <router-link to="/" class="nav-item" active-class="active">
+            <el-icon><House /></el-icon>
+            <span>首页</span>
+          </router-link>
+          <router-link to="/archive" class="nav-item" active-class="active">
+            <el-icon><Calendar /></el-icon>
+            <span>归档</span>
+          </router-link>
+          <router-link to="/categories" class="nav-item" active-class="active">
+            <el-icon><Folder /></el-icon>
+            <span>分类</span>
+          </router-link>
+          <router-link to="/tags" class="nav-item" active-class="active">
+            <el-icon><CollectionTag /></el-icon>
+            <span>标签</span>
+          </router-link>
+          <router-link to="/about" class="nav-item" active-class="active">
+            <el-icon><User /></el-icon>
+            <span>关于</span>
+          </router-link>
+        </div>
+
+        <div class="nav-actions">
+          <div class="search-container">
+            <el-input
+              v-model="searchKeyword"
+              placeholder="搜索文章..."
+              class="search-input"
+              @keyup.enter="handleSearch"
+              clearable
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
+          </div>
+
+          <el-switch
+            v-model="isDark"
+            class="theme-switch"
+            inline-prompt
+            :active-icon="Moon"
+            :inactive-icon="Sunny"
+            @change="toggleTheme"
+          />
+
+          <div class="auth-section" v-if="!isLoggedIn">
+            <el-button type="primary" @click="$router.push('/user/login')">登录</el-button>
+            <el-button @click="$router.push('/user/register')">注册</el-button>
+          </div>
+
+          <el-dropdown v-else class="user-dropdown">
+            <div class="user-info">
+              <el-avatar :src="currentUser?.avatar" :size="32">
+                {{ currentUser?.name?.charAt(0) }}
+              </el-avatar>
+              <span class="username">{{ currentUser?.name }}</span>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="$router.push('/user/profile')">
+                  <el-icon><User /></el-icon>个人中心
+                </el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/user/posts')">
+                  <el-icon><Document /></el-icon>我的文章
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="handleLogout">
+                  <el-icon><SwitchButton /></el-icon>退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
       </div>
-      <div class="down-arrow" @click="scrollToContent">
-        <el-icon><ArrowDown /></el-icon>
+    </nav>
+
+    <!-- 主横幅区域 -->
+    <section class="hero-banner">
+      <div class="hero-background">
+        <div class="hero-gradient"></div>
       </div>
-      <div class="banner-avatars">
-        <img src="@/assets/ka.png" alt="avatars" />
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">欢迎来到 RE-BIN</h1>
+          <p class="hero-subtitle">分享技术心得，记录生活点滴</p>
+          <p class="hero-description">在这里，我会分享编程技术、生活感悟和学习心得</p>
+          <div class="hero-actions">
+            <el-button type="primary" size="large" @click="scrollToContent">
+              <el-icon><ArrowDown /></el-icon>
+              开始阅读
+            </el-button>
+            <el-button size="large" @click="$router.push('/about')">
+              关于我
+            </el-button>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-card">
+            <div class="stat-number">{{ total }}</div>
+            <div class="stat-label">文章总数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ categories.length }}</div>
+            <div class="stat-label">分类数量</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ tags.length }}</div>
+            <div class="stat-label">标签数量</div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 主内容区 -->
-    <section class="blog-main">
-      <div class="main-left">
-        <!-- 推荐轮播 -->
-        <div class="recommend-card">
-          <el-carousel height="180px">
-            <el-carousel-item v-for="item in recommends" :key="item.id">
-              <img :src="item.cover" class="carousel-img" />
-              <div class="carousel-title">{{ item.title }}</div>
-            </el-carousel-item>
-          </el-carousel>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+      <div class="content-container">
+        <div class="content-grid">
+          <!-- 左侧文章列表 -->
+          <div class="articles-section">
+            <div class="section-header">
+              <h2 class="section-title">最新文章</h2>
+              <div class="section-actions">
+                <el-select v-model="sortBy" placeholder="排序方式" size="small">
+                  <el-option label="最新发布" value="latest" />
+                  <el-option label="最多阅读" value="popular" />
+                </el-select>
+              </div>
+            </div>
+
+            <div class="articles-grid" v-loading="loading">
+              <article
+                v-for="article in articles"
+                :key="article.id"
+                class="article-card"
+                @click="goToPost(article.id)"
+              >
+                <div class="article-cover" v-if="article.cover">
+                  <img :src="article.cover" :alt="article.title" />
+                  <div class="cover-overlay">
+                    <el-icon class="read-icon"><View /></el-icon>
+                  </div>
+                </div>
+                <div class="article-content">
+                  <div class="article-header">
+                    <h3 class="article-title">{{ article.title }}</h3>
+                    <div class="article-meta">
+                      <span class="meta-item">
+                        <el-icon><User /></el-icon>
+                        {{ article.author?.name || '匿名' }}
+                      </span>
+                      <span class="meta-item">
+                        <el-icon><Calendar /></el-icon>
+                        {{ formatDate(article.createTime) }}
+                      </span>
+                      <span class="meta-item" v-if="article.category">
+                        <el-icon><Folder /></el-icon>
+                        {{ article.category.name }}
+                      </span>
+                    </div>
+                  </div>
+                  <p class="article-summary">{{ article.summary || '暂无摘要...' }}</p>
+                  <div class="article-footer">
+                    <div class="article-tags" v-if="article.tags && article.tags.length">
+                      <el-tag
+                        v-for="tag in article.tags.slice(0, 3)"
+                        :key="tag.id"
+                        size="small"
+                        effect="plain"
+                      >
+                        {{ tag.name }}
+                      </el-tag>
+                      <span v-if="article.tags.length > 3" class="more-tags">+{{ article.tags.length - 3 }}</span>
+                    </div>
+                    <div class="read-more">
+                      <el-button type="primary" link>
+                        阅读全文 <el-icon><ArrowRight /></el-icon>
+                      </el-button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <!-- 分页组件 -->
+            <div class="pagination-container" v-if="total > 0">
+              <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :total="total"
+                :page-sizes="[6, 12, 24]"
+                layout="total, sizes, prev, pager, next, jumper"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                background
+              />
+            </div>
+          </div>
+
+          <!-- 右侧边栏 -->
+          <aside class="sidebar">
+            <!-- 个人信息卡片 -->
+            <div class="widget-card author-card">
+              <div class="author-avatar">
+                <img src="../../assets/default-avatar.png" alt="作者头像" />
+              </div>
+              <div class="author-info">
+                <h3 class="author-name">RE-BIN</h3>
+                <p class="author-desc">热爱技术，喜欢分享</p>
+                <div class="author-stats">
+                  <div class="stat-item">
+                    <span class="stat-value">{{ total }}</span>
+                    <span class="stat-label">文章</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value">{{ categories.length }}</span>
+                    <span class="stat-label">分类</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value">{{ tags.length }}</span>
+                    <span class="stat-label">标签</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 分类卡片 -->
+            <div class="widget-card">
+              <h3 class="widget-title">文章分类</h3>
+              <div class="category-list">
+                <div
+                  v-for="category in categories"
+                  :key="category.id"
+                  class="category-item"
+                  @click="filterByCategory(category.id)"
+                >
+                  <span class="category-name">{{ category.name }}</span>
+                  <el-icon><ArrowRight /></el-icon>
+                </div>
+              </div>
+            </div>
+
+            <!-- 标签云 -->
+            <div class="widget-card">
+              <h3 class="widget-title">标签云</h3>
+              <div class="tag-cloud">
+                <el-tag
+                  v-for="tag in tags"
+                  :key="tag.id"
+                  class="tag-item"
+                  @click="filterByTag(tag.id)"
+                  effect="plain"
+                >
+                  {{ tag.name }}
+                </el-tag>
+              </div>
+            </div>
+
+            <!-- 公告卡片 -->
+            <div class="widget-card">
+              <h3 class="widget-title">网站公告</h3>
+              <div class="notice-content">
+                <p>欢迎来到我的个人博客！</p>
+                <p>这里会分享技术文章、生活感悟和学习心得。</p>
+                <p>如有问题，欢迎留言交流。</p>
+              </div>
+            </div>
+          </aside>
         </div>
-        <!-- 文章列表 -->
-        <div class="article-list">
-          <div class="article-card" v-for="item in articles" :key="item.id">
-            <img :src="item.cover" class="article-cover" />
-            <div class="article-info">
-              <h3>{{ item.title }}</h3>
-              <div class="article-meta">
-                <span>👁 {{ item.views }}</span>
-                <span>💬 {{ item.comments }}</span>
-                <span>🕒 {{ item.date }}</span>
-              </div>
-              <p class="article-desc">{{ item.desc }}</p>
-              <div class="article-tags">
-                <el-tag v-for="tag in item.tags" :key="tag">{{ tag }}</el-tag>
-              </div>
+      </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>RE-BIN 博客</h4>
+            <p>分享技术，记录生活</p>
+          </div>
+          <div class="footer-section">
+            <h4>友情链接</h4>
+            <div class="links">
+              <a href="#">GitHub</a>
+              <a href="#">掘金</a>
+              <a href="#">CSDN</a>
+            </div>
+          </div>
+          <div class="footer-section">
+            <h4>联系方式</h4>
+            <div class="contact">
+              <p>Email: contact@rebin.com</p>
+              <p>QQ: 123456789</p>
             </div>
           </div>
         </div>
-      </div>
-      <div class="main-right">
-        <!-- 个人信息卡片 -->
-        <div class="user-card">
-          <img class="user-avatar" src="@/assets/default-avatar.png" />
-          <div class="user-name">Ruyu</div>
-          <div class="user-desc">生活想要活捉了我，不料我是颗种子</div>
-          <div class="user-stats">
-            <span>11 文章数</span>
-            <span>4 分类数</span>
-            <span>91 评论数</span>
-          </div>
-        </div>
-        <!-- 公告卡片 -->
-        <div class="notice-card">
-          <div class="notice-title">公告</div>
-          <div class="notice-content">
-            本项目github & gitee开源地址：<br>
-        <br>
-            ...
-          </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 RE-BIN. All rights reserved.</p>
         </div>
       </div>
-    </section>
+    </footer>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { ArrowDown, Search, Moon, Sunny } from '@element-plus/icons-vue'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
+import {
+  House, Calendar, Folder, CollectionTag, User, Search,
+  Moon, Sunny, Document, SwitchButton, ArrowDown, View,
+  ArrowRight
+} from '@element-plus/icons-vue'
+import * as blogApi from '@/api/blog'
+
+const router = useRouter()
+const store = useStore()
+
+// 响应式数据
+const loading = ref(false)
 const isDark = ref(false)
-const recommends = ref([
-  { id: 1, title: '项目部署文档', cover: 'https://image.kuailemao.xyz/blog/article/cover1.jpg' },
-  { id: 2, title: '部分问题记录与解决', cover: 'https://image.kuailemao.xyz/blog/article/cover2.jpg' }
-])
-const articles = ref([
-  { id: 1, title: '部分问题记录与解决', cover: 'https://image.kuailemao.xyz/blog/article/cover2.jpg', views: 435, comments: 4, date: '2025-04-01', desc: '长内容公告保存失败公告长度限制是1000!...', tags: ['博客'] },
-  { id: 2, title: '项目Minio添加防盗链功能', cover: 'https://image.kuailemao.xyz/blog/article/cover3.jpg', views: 401, comments: 2, date: '2025-03-28', desc: '修复Minio直链外链和各种功能防盗链...', tags: ['技术'] }
-])
-function scrollToContent() {
-  document.querySelector('.blog-main').scrollIntoView({ behavior: 'smooth' })
+const searchKeyword = ref('')
+const sortBy = ref('latest')
+const articles = ref([])
+const categories = ref([])
+const tags = ref([])
+const currentPage = ref(1)
+const pageSize = ref(6)
+const total = ref(0)
+
+// 计算属性
+const isLoggedIn = computed(() => store.getters.isAuthenticated)
+const currentUser = computed(() => store.getters.currentUser)
+
+
+
+// 获取文章列表
+const fetchArticles = async () => {
+  loading.value = true
+  try {
+    const response = await blogApi.getHomePosts(currentPage.value, pageSize.value)
+    if (response.code === 200) {
+      articles.value = response.data.posts || []
+      total.value = response.data.total || 0
+    } else {
+      ElMessage.error(response.message || '获取文章列表失败')
+    }
+  } catch (error) {
+    console.error('获取文章列表失败:', error)
+    ElMessage.error('获取文章列表失败')
+    // 使用模拟数据作为后备
+    articles.value = [
+      {
+        id: 1,
+        title: '示例文章',
+        summary: '这是一篇示例文章，当API请求失败时显示。',
+        cover: 'https://picsum.photos/400/200?random=1',
+        author: { name: 'RE-BIN' },
+        category: { name: '示例分类' },
+        createTime: new Date().toISOString()
+      }
+    ]
+    total.value = 1
+  } finally {
+    loading.value = false
+  }
 }
-// 粒子背景可用第三方库或canvas实现，这里预留id
+
+// 获取分类列表
+const fetchCategories = async () => {
+  try {
+    const response = await blogApi.getCategories()
+    if (response.code === 200) {
+      categories.value = response.data || []
+    } else {
+      ElMessage.error(response.message || '获取分类列表失败')
+    }
+  } catch (error) {
+    console.error('获取分类列表失败:', error)
+    // 使用模拟数据作为后备
+    categories.value = [
+      { id: 1, name: '示例分类', postCount: 1 }
+    ]
+  }
+}
+
+// 获取标签列表
+const fetchTags = async () => {
+  try {
+    const response = await blogApi.getTags()
+    if (response.code === 200) {
+      tags.value = response.data || []
+    } else {
+      ElMessage.error(response.message || '获取标签列表失败')
+    }
+  } catch (error) {
+    console.error('获取标签列表失败:', error)
+    // 使用模拟数据作为后备
+    tags.value = [
+      { id: 1, name: '示例标签' }
+    ]
+  }
+}
+
+// 格式化日期
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('zh-CN')
+}
+
+// 跳转到文章详情
+const goToPost = (postId) => {
+  router.push(`/post/${postId}`)
+}
+
+// 按分类筛选
+const filterByCategory = (categoryId) => {
+  router.push(`/category/${categoryId}`)
+}
+
+// 按标签筛选
+const filterByTag = (tagId) => {
+  router.push(`/tag/${tagId}`)
+}
+
+// 搜索处理
+const handleSearch = () => {
+  if (searchKeyword.value.trim()) {
+    router.push(`/search?q=${encodeURIComponent(searchKeyword.value)}`)
+  }
+}
+
+// 主题切换
+const toggleTheme = () => {
+  document.documentElement.classList.toggle('dark', isDark.value)
+  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
+}
+
+// 退出登录
+const handleLogout = async () => {
+  try {
+    await store.dispatch('logout')
+    ElMessage.success('退出登录成功')
+    router.push('/')
+  } catch (error) {
+    ElMessage.error('退出登录失败')
+  }
+}
+
+// 滚动到内容区域
+const scrollToContent = () => {
+  document.querySelector('.main-content').scrollIntoView({
+    behavior: 'smooth'
+  })
+}
+
+// 分页处理
+const handleSizeChange = (newSize) => {
+  pageSize.value = newSize
+  currentPage.value = 1
+  fetchArticles()
+}
+
+const handleCurrentChange = (newPage) => {
+  currentPage.value = newPage
+  fetchArticles()
+}
+
+// 初始化主题
+const initTheme = () => {
+  const savedTheme = localStorage.getItem('theme')
+  isDark.value = savedTheme === 'dark'
+  document.documentElement.classList.toggle('dark', isDark.value)
+}
+
+// 初始化
 onMounted(() => {
-  // 可在此初始化粒子动效
+  initTheme()
+  fetchArticles()
+  fetchCategories()
+  fetchTags()
 })
 </script>
 
 <style scoped>
-.blog-home-bg { min-height: 100vh; background: #23272e; position: relative; }
-#particles-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
-.blog-header { width: 100%; height: 64px; display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; z-index: 10; background: rgba(34,39,46,0.95); box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08); padding: 0 48px; }
-.logo { font-size: 2rem; font-weight: bold; color: #fff; letter-spacing: 2px; }
-.nav-menu { display: flex; gap: 32px; align-items: center; }
-.nav-menu a { color: #fff; font-size: 1.1rem; text-decoration: none; padding: 6px 16px; border-radius: 8px; transition: background 0.2s, color 0.2s; }
-.nav-menu a:hover, .nav-login { background: #ff7e7e; color: #fff; }
-.header-actions { display: flex; align-items: center; gap: 18px; }
-.search-input { width: 180px; border-radius: 10px; background: #23272e; border: none; color: #fff; }
-.login-btn { background: #ff7e7e; color: #fff; border-radius: 8px; font-weight: 600; border: none; padding: 6px 18px; }
-.blog-banner { width: 100%; height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 64px; position: relative; background: transparent; z-index: 1; }
-.main-title { font-size: 3.2rem; color: #fff; font-weight: bold; text-shadow: 0 4px 24px #000, 0 1px 0 #fff; margin-bottom: 18px; }
-.subtitle-bar { background: linear-gradient(90deg, #ff7e7e 0%, #6dd5fa 100%); color: #fff; font-size: 1.2rem; padding: 8px 32px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 2px 12px 0 rgba(255,126,126,0.12); }
-.down-arrow { font-size: 2.2rem; color: #fff; margin-bottom: 12px; cursor: pointer; animation: bounce 1.5s infinite; }
-@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(16px); } }
-.banner-avatars { position: absolute; left: 50%; bottom: -32px; transform: translateX(-50%); z-index: 2; }
-.banner-avatars img { height: 80px; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.18)); }
-.blog-main { display: flex; max-width: 1200px; margin: 0 auto; gap: 32px; padding-top: 32px; z-index: 2; position: relative; }
-.main-left { flex: 2; display: flex; flex-direction: column; gap: 24px; }
-.main-right { flex: 1; display: flex; flex-direction: column; gap: 24px; }
-.recommend-card { background: #23272e; border-radius: 18px; box-shadow: 0 4px 24px 0 rgba(255,126,126,0.08); overflow: hidden; margin-bottom: 12px; }
-.carousel-img { width: 100%; height: 180px; object-fit: cover; border-radius: 18px; }
-.carousel-title { position: absolute; left: 24px; bottom: 18px; color: #fff; font-size: 1.3rem; font-weight: bold; text-shadow: 0 2px 8px #000; }
-.article-list { display: flex; flex-direction: column; gap: 18px; }
-.article-card { background: #23272e; border-radius: 18px; box-shadow: 0 4px 24px 0 rgba(255,126,126,0.08); overflow: hidden; display: flex; gap: 18px; padding: 18px; align-items: flex-start; }
-.article-cover { width: 120px; height: 90px; object-fit: cover; border-radius: 12px; }
-.article-info { flex: 1; }
-.article-info h3 { font-size: 1.2rem; color: #ff7e7e; margin-bottom: 8px; font-weight: bold; }
-.article-meta { font-size: 0.95rem; color: #aaa; display: flex; gap: 18px; margin-bottom: 6px; }
-.article-desc { color: #ccc; font-size: 1rem; margin-bottom: 8px; }
-.article-tags { display: flex; gap: 8px; }
-.user-card { background: #23272e; border-radius: 18px; box-shadow: 0 4px 24px 0 rgba(255,126,126,0.08); padding: 24px 18px; display: flex; flex-direction: column; align-items: center; }
-.user-avatar { width: 72px; height: 72px; border-radius: 50%; margin-bottom: 12px; }
-.user-name { font-size: 1.2rem; color: #fff; font-weight: bold; margin-bottom: 6px; }
-.user-desc { color: #aaa; font-size: 1rem; margin-bottom: 12px; text-align: center; }
-.user-stats { display: flex; gap: 12px; color: #ffd04b; font-size: 0.98rem; margin-bottom: 8px; }
-.notice-card { background: #23272e; border-radius: 18px; box-shadow: 0 4px 24px 0 rgba(255,126,126,0.08); padding: 18px 16px; color: #fff; }
-.notice-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; }
-.notice-content { color: #ccc; font-size: 0.98rem; }
-@media (max-width: 900px) {
-  .blog-main { flex-direction: column; padding: 0 8px; }
-  .main-left, .main-right { width: 100%; }
+/* 全局样式 */
+.modern-blog {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-</style> 
+
+/* 顶部导航 */
+.top-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+
+.nav-brand .brand-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.logo-subtitle {
+  font-size: 12px;
+  color: #7f8c8d;
+  margin-top: 2px;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  text-decoration: none;
+  color: #2c3e50;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  background: #3498db;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.search-container {
+  width: 250px;
+}
+
+.search-input {
+  border-radius: 20px;
+}
+
+.theme-switch {
+  --el-switch-on-color: #3498db;
+  --el-switch-off-color: #95a5a6;
+}
+
+.auth-section {
+  display: flex;
+  gap: 10px;
+}
+
+.user-dropdown .user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: background 0.3s ease;
+}
+
+.user-dropdown .user-info:hover {
+  background: rgba(52, 152, 219, 0.1);
+}
+
+.username {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+/* 主横幅 */
+.hero-banner {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hero-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  animation: fadeInUp 1s ease-out;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  opacity: 0.9;
+  animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.hero-description {
+  font-size: 1.1rem;
+  margin-bottom: 40px;
+  opacity: 0.8;
+  animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 60px;
+  animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  animation: fadeInUp 1s ease-out 0.8s both;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* 主内容区域 */
+.main-content {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding: 80px 0;
+}
+
+.content-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 40px;
+}
+
+/* 文章区域 */
+.articles-section {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f1f2f6;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.articles-grid {
+  display: grid;
+  gap: 30px;
+}
+
+.article-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid #f1f2f6;
+}
+
+.article-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.article-cover {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.article-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.article-card:hover .article-cover img {
+  transform: scale(1.05);
+}
+
+.cover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.article-card:hover .cover-overlay {
+  opacity: 1;
+}
+
+.read-icon {
+  color: white;
+  font-size: 2rem;
+}
+
+.article-content {
+  padding: 25px;
+}
+
+.article-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  font-size: 0.85rem;
+  color: #7f8c8d;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.article-summary {
+  color: #5a6c7d;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.article-tags {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.more-tags {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+.pagination-container {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+/* 侧边栏 */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.widget-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  border: 1px solid #f1f2f6;
+}
+
+.widget-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #3498db;
+}
+
+/* 作者卡片 */
+.author-card {
+  text-align: center;
+}
+
+.author-avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  border: 3px solid #3498db;
+}
+
+.author-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.author-desc {
+  color: #7f8c8d;
+  margin-bottom: 20px;
+}
+
+.author-stats {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #3498db;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+}
+
+/* 分类列表 */
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-item:hover {
+  background: #3498db;
+  color: white;
+  transform: translateX(5px);
+}
+
+.category-name {
+  font-weight: 500;
+}
+
+/* 标签云 */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag-item {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tag-item:hover {
+  transform: scale(1.05);
+}
+
+/* 公告内容 */
+.notice-content {
+  color: #5a6c7d;
+  line-height: 1.6;
+}
+
+.notice-content p {
+  margin-bottom: 10px;
+}
+
+/* 页脚 */
+.site-footer {
+  background: #2c3e50;
+  color: white;
+  padding: 50px 0 20px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.footer-section h4 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: #3498db;
+}
+
+.footer-section p {
+  color: #bdc3c7;
+  line-height: 1.6;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.links a {
+  color: #bdc3c7;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.links a:hover {
+  color: #3498db;
+}
+
+.contact p {
+  color: #bdc3c7;
+  margin-bottom: 8px;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #34495e;
+  color: #95a5a6;
+}
+
+/* 动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    height: auto;
+    padding: 15px 20px;
+  }
+
+  .nav-menu {
+    margin: 15px 0;
+    gap: 15px;
+  }
+
+  .nav-actions {
+    gap: 10px;
+  }
+
+  .search-container {
+    width: 200px;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .sidebar {
+    order: -1;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .articles-section,
+  .widget-card {
+    padding: 20px;
+  }
+}
+
+/* 暗色主题 */
+:global(.dark) .modern-blog {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+}
+
+:global(.dark) .top-navbar {
+  background: rgba(44, 62, 80, 0.95);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+:global(.dark) .logo-text,
+:global(.dark) .nav-item,
+:global(.dark) .username {
+  color: #ecf0f1;
+}
+
+:global(.dark) .logo-subtitle {
+  color: #bdc3c7;
+}
+
+:global(.dark) .main-content {
+  background: #34495e;
+}
+
+:global(.dark) .articles-section,
+:global(.dark) .widget-card {
+  background: #2c3e50;
+  border-color: #34495e;
+}
+
+:global(.dark) .section-title,
+:global(.dark) .article-title,
+:global(.dark) .widget-title,
+:global(.dark) .author-name {
+  color: #ecf0f1;
+}
+
+:global(.dark) .article-summary,
+:global(.dark) .notice-content {
+  color: #bdc3c7;
+}
+
+:global(.dark) .category-item {
+  background: #34495e;
+  color: #ecf0f1;
+}
+
+:global(.dark) .category-item:hover {
+  background: #3498db;
+}
+</style>
