@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="llf.llf.mapper.TagMapper">
+
+    <resultMap id="BaseResultMap" type="llf.llf.pojo.Tag">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name
+    </sql>
+
+    <insert id="add" parameterType="llf.llf.pojo.Tag" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tag (name)
+        VALUES (#{name})
+    </insert>
+
+    <update id="update" parameterType="llf.llf.pojo.Tag">
+        UPDATE tag SET name = #{name}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM tag WHERE id = #{id}
+    </delete>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM tag
+        ORDER BY name
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM tag
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByName" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM tag WHERE name = #{name}
+    </select>
+
+    <select id="selectByPostId" resultMap="BaseResultMap">
+        SELECT t.id, t.name
+        FROM tag t
+        INNER JOIN post_tag pt ON t.id = pt.tag_id
+        WHERE pt.post_id = #{postId}
+    </select>
+
+    <insert id="addPostTag">
+        INSERT INTO post_tag (post_id, tag_id)
+        VALUES (#{postId}, #{tagId})
+    </insert>
+
+    <delete id="deletePostTags">
+        DELETE FROM post_tag WHERE post_id = #{postId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="llf.llf.mapper.CategoryMapper">
+
+    <resultMap id="BaseResultMap" type="llf.llf.pojo.Category">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, description
+    </sql>
+
+    <insert id="add" parameterType="llf.llf.pojo.Category" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO category (name, description)
+        VALUES (#{name}, #{description})
+    </insert>
+
+    <update id="update" parameterType="llf.llf.pojo.Category">
+        UPDATE category SET
+            name = #{name},
+            description = #{description}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM category WHERE id = #{id}
+    </delete>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM category
+        ORDER BY id ASC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM category WHERE id = #{id}
+    </select>
+
+    <select id="selectByName" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM category WHERE name = #{name}
+    </select>
+
+</mapper>
