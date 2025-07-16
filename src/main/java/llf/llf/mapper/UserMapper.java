@@ -26,7 +26,7 @@ public interface UserMapper extends BaseMapper<User> {
     // 登录验证方法
     User login(String username, String password);
 
-    @Update("UPDATE user SET avatar = #{avatar} WHERE id = #{id}")
-int updateAvatar(@Param("id") Integer id, @Param("avatar") String avatarUrl);
+    @Update("UPDATE user SET avatar = #{avatarUrl} WHERE id = #{id}")
+    int updateAvatar(@Param("id") Integer id, @Param("avatarUrl") String avatarUrl);
 
 }

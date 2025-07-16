@@ -26,7 +26,8 @@ public class SaTokenConfig implements WebMvcConfigurer {
                     .notMatch("/auth/info")          // 获取用户信息接口不需要认证
                     .notMatch("/auth/check")         // 检查登录状态接口不需要认证
                     .notMatch("/posts/published")    // 公开的文章列表不需要认证
-                    .notMatch("/posts/*")            // 查看文章详情不需要认证
+                    .notMatch("/posts/**")           // 查看文章详情不需要认证
+                    .notMatch("/api/blog/**")        // 博客前台API不需要认证
                     .notMatch("/categories")         // 查看分类列表不需要认证
                     .notMatch("/tags")               // 查看标签列表不需要认证
                     .notMatch("/comments/post/*")    // 查看文章评论不需要认证

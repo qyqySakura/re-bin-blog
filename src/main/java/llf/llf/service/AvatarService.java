@@ -27,31 +27,36 @@ public class AvatarService {
         if (file == null || file.isEmpty()) {
             throw new BusinessException("上传文件不能为空");
         }
+
         // 1. 保存文件到物理磁盘
         String originalName = Objects.requireNonNull(file.getOriginalFilename()).replaceAll("[^a-zA-Z0-9.\\-_]", "_");
         String fileName = System.currentTimeMillis() + "_" + originalName;
         File dest = new File(AVATAR_BASE_PATH + fileName);
+
         // 自动创建目录
         File parent = dest.getParentFile();
         if (!parent.exists()) {
             parent.mkdirs();
         }
+
         try {
             file.transferTo(dest);
         } catch (IOException e) {
             throw new BusinessException("头像上传失败: " + e.getMessage());
         }
-        // 数据库只存相对路径
-        String url = "/avatar/" + fileName;
 
-        // 2. 更新数据库
+        // 直接存储完整的访问URL路径
+        String avatarUrl = "/avatar/" + fileName;
+
+        // 2. 更新数据库 - 直接存储完整路径
         if ("user".equals(role)) {
-            userMapper.updateAvatar(id, url);
+            userMapper.updateAvatar(id, avatarUrl);
         } else if ("admin".equals(role)) {
-            adminMapper.updateAvatar(id, url);
+            adminMapper.updateAvatar(id, avatarUrl);
         } else {
             throw new BusinessException("未知角色类型: " + role);
         }
-        return url;
+
+        return avatarUrl;
     }
 }

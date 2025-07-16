@@ -112,7 +112,7 @@ const rules = {
 async function fetchUsers() {
   loading.value = true
   try {
-    const res = await axios.get('/users')
+    const res = await axios.get('/user')
     // 确保返回数据包含完整avatar字段
     users.value = res.data.map(user => ({
       ...user,
@@ -146,7 +146,7 @@ async function handleDelete(id) {
       type: 'warning'
     })
     
-    await axios.delete(`/users/del/${id}`)
+    await axios.delete(`/user/del/${id}`)
     ElMessage.success('删除成功')
     fetchUsers()
   } catch (error) {
@@ -161,33 +161,34 @@ async function submitForm() {
   try {
     await formRef.value.validate()
     submitLoading.value = true
-    if (avatarFile.value) {
+
+    // 如果有新上传的头像文件，先上传头像
+    if (avatarFile.value && form.value.id) {
       const url = await uploadAvatar(
         avatarFile.value,
         'user',
-        // 新增时无id，使用临时标识
-        form.value.id || 'temp-user' 
+        form.value.id
       )
       form.value.avatar = url
     }
 
-    if (form.value.id && !form.value.avatar) {
-  // 修复变量名：editingAdmin → editingUser
-  form.value.avatar = editingUser.value?.avatar || null
-}
-
+    // 如果是编辑且没有新头像，保持原头像
+    if (form.value.id && !avatarFile.value && editingUser.value?.avatar) {
+      form.value.avatar = editingUser.value.avatar
+    }
 
     if (form.value.id) {
-      await axios.put('/users/update', form.value)
+      await axios.put('/user/update', form.value)
       ElMessage.success('更新成功')
     } else {
-      await axios.post('/users/add', form.value)
+      await axios.post('/user/add', form.value)
       ElMessage.success('添加成功')
     }
     dialogVisible.value = false
     fetchUsers()
   } catch (error) {
     console.error('提交失败:', error)
+    ElMessage.error('操作失败: ' + (error.response?.data?.message || error.message))
   } finally {
     submitLoading.value = false
   }

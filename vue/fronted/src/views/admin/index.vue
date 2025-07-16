@@ -139,25 +139,21 @@ async function submitForm() {
     await formRef.value.validate()
     submitLoading.value = true
 
-    submitLoading.value = true
-  
-    // 先上传头像（无论新增/编辑）
-    if (avatarFile.value) {
+    // 如果有新上传的头像文件，先上传头像
+    if (avatarFile.value && form.value.id) {
       const url = await uploadAvatar(
         avatarFile.value,
-        'user',
-        // 新增时无id，使用临时标识
-        form.value.id || 'temp-user' 
+        'admin',  // 修正角色参数
+        form.value.id
       )
       form.value.avatar = url
     }
 
-    if (
-      form.value.id &&
-      (!form.value.avatar || form.value.avatar === '' || form.value.avatar === undefined)
-    ) {
-      form.value.avatar = editingAdmin.value && editingAdmin.value.avatar ? editingAdmin.value.avatar : null
+    // 如果是编辑且没有新头像，保持原头像
+    if (form.value.id && !avatarFile.value && editingAdmin.value?.avatar) {
+      form.value.avatar = editingAdmin.value.avatar
     }
+
     if (form.value.id) {
       await axios.put('/admins/update', form.value)
       ElMessage.success('更新成功')
@@ -169,6 +165,7 @@ async function submitForm() {
     fetchAdmins()
   } catch (error) {
     console.error('提交失败:', error)
+    ElMessage.error('操作失败: ' + (error.response?.data?.message || error.message))
   } finally {
     submitLoading.value = false
   }

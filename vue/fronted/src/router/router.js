@@ -151,6 +151,11 @@ const routes = [
         path: 'test',
         component: () => import('../views/test/ApiTest.vue'),
         meta: { title: 'API测试' }
+      },
+      {
+        path: 'avatar-test',
+        component: () => import('../views/test/AvatarTest.vue'),
+        meta: { title: '头像上传测试' }
       }
     ]
   },
