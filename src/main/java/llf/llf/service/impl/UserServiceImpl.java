@@ -1,6 +1,7 @@
 package llf.llf.service.impl;
 
 
+import llf.llf.common.BusinessException;
 import llf.llf.mapper.UserMapper;
 import llf.llf.pojo.User;
 import llf.llf.service.RedisEmailCodeService;
@@ -29,51 +30,110 @@ public class UserServiceImpl implements UserService {
     private String fromEmail;
     @Override
     public String generateAndSendEmailCode(String email) {
-        // 1. 生成6位验证码
-        String code = String.valueOf((int)((Math.random() * 9 + 1) * 100000));
-        // 2. 保存到Redis缓存，5分钟过期
+        // 1. 参数验证
+        if (email == null || email.trim().isEmpty()) {
+            throw new BusinessException("邮箱地址不能为空");
+        }
+
+        // 2. 检查是否频繁发送（60秒内只能发送一次）
+        String lastSendKey = "email_code_last_send:" + email;
+        String lastSendTime = redisEmailCodeService.getCode(lastSendKey);
+        if (lastSendTime != null) {
+            long timeDiff = System.currentTimeMillis() - Long.parseLong(lastSendTime);
+            if (timeDiff < 60000) { // 60秒限制
+                long remainingSeconds = (60000 - timeDiff) / 1000;
+                throw new BusinessException("验证码发送过于频繁，请" + remainingSeconds + "秒后再试");
+            }
+        }
+
+        // 3. 生成6位安全验证码
+        String code = generateSecureCode();
+
+        // 4. 保存验证码到Redis缓存，5分钟过期
         redisEmailCodeService.saveCode(email, code);
 
+        // 5. 记录发送时间，防止频繁发送
+        redisEmailCodeService.saveCode(lastSendKey, String.valueOf(System.currentTimeMillis()));
+
         try {
-            // 3. 发送邮件 (临时禁用，直接打印验证码)
-            System.out.println("【测试模式】邮件发送已禁用，验证码: " + code + " 已保存到Redis，请使用此验证码测试");
+            // 6. 发送邮件 (测试模式：直接打印验证码)
+            System.out.println("【验证码服务】邮箱: " + email + " | 验证码: " + code + " | 有效期: 5分钟");
 
-            // /* 实际邮件发送代码（暂时注释）
+            // 实际邮件发送代码（生产环境启用）
+            /*
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail); // 使用配置文件中的邮箱地址
+            message.setFrom(fromEmail);
             message.setTo(email);
-            message.setSubject("RE-BIN博客 - 注册验证码");
-            message.setText("RE-BIN博客注册验证：\n\n" +
-                    "您的验证码是：" + code + "\n\n" +
-                    "验证码有效期5分钟，请及时使用。\n\n" +
-                    "如果这不是您的操作，请忽略此邮件。\n\n" +
-                    "感谢您使用RE-BIN博客！");
+            message.setSubject("RE-BIN博客 - 邮箱验证码");
+            message.setText(buildEmailContent(code));
             mailSender.send(message);
+            System.out.println("验证码邮件发送成功: " + email);
+            */
 
-            System.out.println("邮件发送成功: " + email + ", 验证码: " + code);
         } catch (Exception e) {
-            System.out.println("邮件发送失败: " + email + ", 错误: " + e.getMessage());
-            // 即使邮件发送失败，也返回验证码，因为已经保存到缓存中
-            // 在实际生产环境中，可以记录日志或发送警报
+            System.err.println("验证码邮件发送失败: " + email + " | 错误: " + e.getMessage());
+            // 邮件发送失败不影响验证码的使用，因为已保存到缓存
         }
 
         return code;
     }
 
+    /**
+     * 生成安全的6位数字验证码
+     */
+    private String generateSecureCode() {
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        int code = 100000 + random.nextInt(900000); // 生成100000-999999之间的数字
+        return String.valueOf(code);
+    }
+
+    /**
+     * 构建邮件内容
+     */
+    private String buildEmailContent(String code) {
+        return "【RE-BIN博客】邮箱验证\n\n" +
+               "您好！\n\n" +
+               "您的验证码是：" + code + "\n\n" +
+               "验证码有效期为5分钟，请及时使用。\n" +
+               "为了您的账户安全，请勿将验证码告诉他人。\n\n" +
+               "如果这不是您的操作，请忽略此邮件。\n\n" +
+               "此邮件由系统自动发送，请勿回复。\n\n" +
+               "RE-BIN博客团队";
+    }
+
     @Override
     public boolean verifyEmailCode(String email, String code) {
-        if (email == null || code == null) {
+        // 1. 参数验证
+        if (email == null || email.trim().isEmpty() || code == null || code.trim().isEmpty()) {
+            System.out.println("验证码验证失败: 参数为空 | 邮箱: " + email + " | 验证码: " + code);
             return false;
         }
 
-        String cachedCode = redisEmailCodeService.getCode(email);
-        if (cachedCode != null && cachedCode.equals(code)) {
-            // 验证成功后删除验证码
-            redisEmailCodeService.removeCode(email);
-            return true;
+        // 2. 验证码格式检查（6位数字）
+        if (!code.matches("\\d{6}")) {
+            System.out.println("验证码验证失败: 格式错误 | 邮箱: " + email + " | 验证码: " + code);
+            return false;
         }
 
-        return false;
+        // 3. 从缓存中获取验证码
+        String cachedCode = redisEmailCodeService.getCode(email);
+        if (cachedCode == null) {
+            System.out.println("验证码验证失败: 验证码不存在或已过期 | 邮箱: " + email);
+            return false;
+        }
+
+        // 4. 验证码比对
+        if (cachedCode.equals(code)) {
+            // 验证成功后立即删除验证码，防止重复使用
+            redisEmailCodeService.removeCode(email);
+            // 同时删除发送时间限制
+            redisEmailCodeService.removeCode("email_code_last_send:" + email);
+            System.out.println("验证码验证成功 | 邮箱: " + email);
+            return true;
+        } else {
+            System.out.println("验证码验证失败: 验证码错误 | 邮箱: " + email + " | 输入: " + code + " | 期望: " + cachedCode);
+            return false;
+        }
     }
 
     @Autowired
