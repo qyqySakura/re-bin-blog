@@ -38,7 +38,7 @@ public class AuthController {
 
             result.put("user", admin);
             result.put("userType", "admin");
-            result.put("token", SaTokenUtil.getTokenValue());
+            result.put("token", SaTokenUtil.getTokenValue("admin"));
             return Result.success(result);
         }
         
@@ -48,7 +48,7 @@ public class AuthController {
             User user = userService.selectById((Integer) userId);
             result.put("user", user);
             result.put("userType", "user");
-            result.put("token", SaTokenUtil.getTokenValue());
+            result.put("token", SaTokenUtil.getTokenValue("user"));
             return Result.success(result);
         }
         

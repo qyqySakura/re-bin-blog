@@ -15,7 +15,9 @@ export const userApi = {
   // 更新用户
   updateUser: (data) => request.put('/user/update', data),
   // 删除用户
-  deleteUser: (id) => request.delete(`/user/del/${id}`)
+  deleteUser: (id) => request.delete(`/user/del/${id}`),
+  // 修改密码
+  changePassword: (data) => request.post('/user/changePassword', data)
 }
 
 // 管理员相关API

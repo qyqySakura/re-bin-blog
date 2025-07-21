@@ -97,17 +97,6 @@ const rules = {
   phone: [{ required: true, message: '请输入电话', trigger: 'blur' }]
 }
 
-// async function fetchUsers() {
-//   loading.value = true
-//   try {
-//     const res = await axios.get('/users')
-//     users.value = res.data || []
-//   } catch (error) {
-//     console.error('获取用户列表失败:', error)
-//   } finally {
-//     loading.value = false
-//   }
-// }
 
 async function fetchUsers() {
   loading.value = true

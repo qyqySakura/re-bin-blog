@@ -4,16 +4,6 @@
       <el-form-item label="头像">
         <el-image style="width: 40px; height: 40px; border-radius: 50%; display: block" v-if="scope.row.avatar"
                   :src="scope.row.avatar" :preview-src-list="[scope.row.avatar]" preview-teleported></el-image>
-<!--        <el-upload-->
-<!--          class="avatar-uploader"-->
-<!--          :action="uploadUrl"-->
-<!--          :show-file-list="false"-->
-<!--          :on-success="handleAvatarSuccess"-->
-<!--          :before-upload="beforeAvatarUpload"-->
-<!--        >-->
-<!--          <img v-if="form.avatar" :src="form.avatar" class="avatar" />-->
-<!--          <i v-else class="el-icon-plus avatar-uploader-icon"></i>-->
-<!--        </el-upload>-->
       </el-form-item>
 
       <el-form-item label="姓名">

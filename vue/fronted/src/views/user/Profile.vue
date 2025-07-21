@@ -142,8 +142,10 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { userApi } from '@/utils/api'
+import { getCurrentUser, updateUserInfo, uploadAvatar } from '@/api/blog'
 
 // 响应式数据
 const saving = ref(false)
@@ -154,19 +156,19 @@ const editFormRef = ref()
 const passwordFormRef = ref()
 
 const userInfo = ref({
-  id: 1,
-  name: '用户名',
-  email: 'user@example.com',
+  id: null,
+  name: '',
+  email: '',
   avatar: '',
-  bio: '这个人很懒，什么都没有留下...',
+  bio: '',
   website: '',
   location: ''
 })
 
 const userStats = ref({
-  posts: 12,
-  comments: 45,
-  likes: 128
+  posts: 0,
+  comments: 0,
+  likes: 0
 })
 
 const editForm = reactive({
@@ -217,6 +219,33 @@ const passwordRules = {
   ]
 }
 
+// 获取用户信息
+const fetchUserInfo = async () => {
+  try {
+    const response = await getCurrentUser()
+    if (response.code === 200) {
+      const userData = response.data.user
+      userInfo.value = {
+        id: userData.id,
+        name: userData.username || userData.name || '',
+        email: userData.email || '',
+        avatar: userData.avatar || '',
+        bio: userData.bio || '',
+        website: userData.website || '',
+        location: userData.location || ''
+      }
+
+      // 获取用户统计信息（如果有相关API）
+      // await fetchUserStats()
+
+      initForm()
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+    ElMessage.error('获取用户信息失败')
+  }
+}
+
 // 初始化表单数据
 const initForm = () => {
   editForm.name = userInfo.value.name
@@ -229,19 +258,33 @@ const initForm = () => {
 // 保存个人信息
 const handleSave = async () => {
   if (!editFormRef.value) return
-  
+
   try {
     await editFormRef.value.validate()
     saving.value = true
-    
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // 更新用户信息
-    Object.assign(userInfo.value, editForm)
-    
-    ElMessage.success('保存成功')
+
+    // 准备更新数据
+    const updateData = {
+      id: userInfo.value.id,
+      username: editForm.name,
+      email: editForm.email,
+      bio: editForm.bio,
+      website: editForm.website,
+      location: editForm.location
+    }
+
+    // 调用更新API
+    const response = await updateUserInfo(updateData)
+
+    if (response.code === 200) {
+      // 更新本地用户信息
+      Object.assign(userInfo.value, editForm)
+      ElMessage.success('保存成功')
+    } else {
+      ElMessage.error(response.message || '保存失败')
+    }
   } catch (error) {
+    console.error('保存失败:', error)
     ElMessage.error('保存失败')
   } finally {
     saving.value = false
@@ -256,21 +299,29 @@ const resetForm = () => {
 // 修改密码
 const handlePasswordChange = async () => {
   if (!passwordFormRef.value) return
-  
+
   try {
     await passwordFormRef.value.validate()
     changingPassword.value = true
-    
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    ElMessage.success('密码修改成功')
-    
-    // 清空表单
-    passwordForm.currentPassword = ''
-    passwordForm.newPassword = ''
-    passwordForm.confirmPassword = ''
+
+    // 调用修改密码API
+    const response = await userApi.changePassword({
+      currentPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword
+    })
+
+    if (response.code === 200) {
+      ElMessage.success('密码修改成功')
+
+      // 清空表单
+      passwordForm.currentPassword = ''
+      passwordForm.newPassword = ''
+      passwordForm.confirmPassword = ''
+    } else {
+      ElMessage.error(response.message || '密码修改失败')
+    }
   } catch (error) {
+    console.error('密码修改失败:', error)
     ElMessage.error('密码修改失败')
   } finally {
     changingPassword.value = false
@@ -300,19 +351,45 @@ const handleAvatarUpload = (options) => {
     newAvatar.value = e.target.result
   }
   reader.readAsDataURL(options.file)
+
+  // 保存文件对象用于上传
+  newAvatarFile.value = options.file
 }
 
+// 新增：保存文件对象
+const newAvatarFile = ref(null)
+
 // 确认头像上传
-const confirmAvatarUpload = () => {
-  userInfo.value.avatar = newAvatar.value
-  showAvatarUpload.value = false
-  newAvatar.value = ''
-  ElMessage.success('头像更新成功')
+const confirmAvatarUpload = async () => {
+  if (!newAvatarFile.value) {
+    ElMessage.error('请选择头像文件')
+    return
+  }
+
+  try {
+    const formData = new FormData()
+    formData.append('file', newAvatarFile.value)
+
+    const response = await uploadAvatar(formData)
+
+    if (response.code === 200) {
+      userInfo.value.avatar = response.data
+      showAvatarUpload.value = false
+      newAvatar.value = ''
+      newAvatarFile.value = null
+      ElMessage.success('头像更新成功')
+    } else {
+      ElMessage.error(response.message || '头像上传失败')
+    }
+  } catch (error) {
+    console.error('头像上传失败:', error)
+    ElMessage.error('头像上传失败')
+  }
 }
 
 // 初始化
-onMounted(() => {
-  initForm()
+onMounted(async () => {
+  await fetchUserInfo()
 })
 </script>
 

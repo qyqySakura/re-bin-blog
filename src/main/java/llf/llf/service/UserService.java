@@ -22,4 +22,7 @@ String generateAndSendEmailCode(String email);
     
     // 登录验证方法
     User login(String username, String password);
+
+    // 修改密码
+    boolean changePassword(Integer userId, String currentPassword, String newPassword);
 }

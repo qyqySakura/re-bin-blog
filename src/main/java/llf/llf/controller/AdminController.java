@@ -27,7 +27,7 @@ public class AdminController {
             SaTokenUtil.login(foundAdmin.getId(), "admin");
             
             Map<String, Object> result = new HashMap<>();
-            result.put("token", SaTokenUtil.getTokenValue());
+            result.put("token", SaTokenUtil.getTokenValue("admin"));
             result.put("user", foundAdmin);
             
             return Result.success(result);

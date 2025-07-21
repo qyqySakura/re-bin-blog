@@ -168,4 +168,33 @@ public class UserServiceImpl implements UserService {
     public User login(String username, String password) {
         return userMapper.login(username, password);
     }
+
+    @Override
+    public boolean changePassword(Integer userId, String currentPassword, String newPassword) {
+        // 1. 获取用户信息
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            return false;
+        }
+
+        // 2. 验证当前密码
+        if (!user.getPassword().equals(currentPassword)) {
+            System.out.println("密码修改失败: 当前密码错误 | 用户ID: " + userId);
+            return false;
+        }
+
+        // 3. 更新密码
+        User updateUser = new User();
+        updateUser.setId(userId);
+        updateUser.setPassword(newPassword);
+
+        int result = userMapper.update(updateUser);
+        if (result > 0) {
+            System.out.println("密码修改成功 | 用户ID: " + userId);
+            return true;
+        } else {
+            System.out.println("密码修改失败: 数据库更新失败 | 用户ID: " + userId);
+            return false;
+        }
+    }
 }

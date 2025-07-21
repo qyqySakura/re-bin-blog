@@ -19,10 +19,11 @@ public class SaTokenConfig implements WebMvcConfigurer {
             SaRouter.match("/**")
                     .notMatch("/admins/auth/login")  // 管理员登录接口不需要认证
                     .notMatch("/admins/auth/logout") // 管理员退出登录接口不需要认证
-                    .notMatch("/users/auth/login")   // 用户登录接口不需要认证
-                    .notMatch("/users/auth/logout")  // 用户退出登录接口不需要认证
-                    .notMatch("/users/sendCode")     // 发送验证码接口不需要认证
-                    .notMatch("/users/add")          // 用户注册接口不需要认证
+                    .notMatch("/user/auth/login")    // 用户登录接口不需要认证
+                    .notMatch("/user/auth/logout")   // 用户退出登录接口不需要认证
+                    .notMatch("/user/sendEmailCode") // 发送验证码接口不需要认证
+                    .notMatch("/user/verifyEmailCode") // 验证邮箱验证码接口不需要认证
+                    .notMatch("/user/add")           // 用户注册接口不需要认证
                     .notMatch("/auth/info")          // 获取用户信息接口不需要认证
                     .notMatch("/auth/check")         // 检查登录状态接口不需要认证
                     .notMatch("/posts/published")    // 公开的文章列表不需要认证
