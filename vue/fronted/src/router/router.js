@@ -146,20 +146,9 @@ const routes = [
         path: 'search',
         component: Search,
         meta: { title: '搜索结果' }
-      },
-      {
-        path: 'test',
-        component: () => import('../views/test/ApiTest.vue'),
-        meta: { title: 'API测试' }
-      },
-      {
-        path: 'avatar-test',
-        component: () => import('../views/test/AvatarTest.vue'),
-        meta: { title: '头像上传测试' }
       }
     ]
   },
-
   // 404页面
   {
     path: '/:pathMatch(.*)*',
