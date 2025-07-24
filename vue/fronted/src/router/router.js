@@ -20,7 +20,7 @@ import PostManage from '../views/admin/PostManage.vue'
 import CategoryManage from '../views/admin/CategoryManage.vue'
 import TagManage from '../views/admin/TagManage.vue'
 import CommentManage from '../views/admin/CommentManage.vue'
-import store from '../store'
+
 
 const routes = [
   // 管理员登录
@@ -149,6 +149,7 @@ const routes = [
       }
     ]
   },
+
   // 404页面
   {
     path: '/:pathMatch(.*)*',
