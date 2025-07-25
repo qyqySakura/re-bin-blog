@@ -18,18 +18,18 @@
         </div>
 
         <div class="login-form">
-          <el-form 
-            :model="loginForm" 
-            :rules="rules" 
-            ref="loginFormRef"
-            @keyup.enter="handleLogin"
+          <el-form
+              :model="loginForm"
+              :rules="rules"
+              ref="loginFormRef"
+              @keyup.enter="handleLogin"
           >
             <el-form-item prop="username">
-              <el-input 
-                v-model="loginForm.username" 
-                placeholder="请输入管理员账号"
-                size="large"
-                clearable
+              <el-input
+                  v-model="loginForm.username"
+                  placeholder="请输入管理员账号"
+                  size="large"
+                  clearable
               >
                 <template #prefix>
                   <el-icon><UserFilled /></el-icon>
@@ -38,13 +38,13 @@
             </el-form-item>
 
             <el-form-item prop="password">
-              <el-input 
-                v-model="loginForm.password" 
-                type="password" 
-                placeholder="请输入密码"
-                size="large"
-                show-password
-                clearable
+              <el-input
+                  v-model="loginForm.password"
+                  type="password"
+                  placeholder="请输入密码"
+                  size="large"
+                  show-password
+                  clearable
               >
                 <template #prefix>
                   <el-icon><Lock /></el-icon>
@@ -59,12 +59,12 @@
             </el-form-item>
 
             <el-form-item>
-              <el-button 
-                type="primary" 
-                size="large" 
-                @click="handleLogin" 
-                :loading="loading"
-                class="login-btn"
+              <el-button
+                  type="primary"
+                  size="large"
+                  @click="handleLogin"
+                  :loading="loading"
+                  class="login-btn"
               >
                 <span v-if="!loading">登录管理后台</span>
                 <span v-else>登录中...</span>
@@ -77,7 +77,7 @@
               <el-icon><Warning /></el-icon>
               <span>请确保在安全的网络环境下登录</span>
             </div>
-            
+
             <div class="back-home">
               <router-link to="/" class="home-link">
                 <el-icon><House /></el-icon>
@@ -106,12 +106,12 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useAdminStore } from '@/stores/admin'
 import { ElMessage } from 'element-plus'
 import { Setting, UserFilled, Lock, Warning, House } from '@element-plus/icons-vue'
 
 const router = useRouter()
-const store = useStore()
+const adminStore = useAdminStore()
 
 // 响应式数据
 const loading = ref(false)
@@ -153,23 +153,19 @@ const updateTime = () => {
 // 登录处理
 const handleLogin = async () => {
   if (!loginFormRef.value) return
-  
+
   try {
     await loginFormRef.value.validate()
     loading.value = true
-    
-    const response = await store.dispatch('adminLogin', {
+
+    await adminStore.login({
       username: loginForm.username,
       password: loginForm.password,
       remember: rememberMe.value
     })
-    
-    if (response.code === 200) {
-      ElMessage.success('登录成功')
-      router.push('/admin')
-    } else {
-      ElMessage.error(response.message || '登录失败')
-    }
+
+    ElMessage.success('登录成功')
+    router.push('/admin')
   } catch (error) {
     console.error('登录失败:', error)
     ElMessage.error('登录失败，请检查账号和密码')
@@ -216,9 +212,9 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  background-image:
+      radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%);
   background-size: 100px 100px;
   animation: patternMove 20s linear infinite;
 }
@@ -391,16 +387,16 @@ onUnmounted(() => {
     padding: 30px 20px;
     margin: 20px;
   }
-  
+
   .admin-logo {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .logo-text h1 {
     font-size: 2rem;
   }
-  
+
   .system-status {
     position: static;
     margin-top: 20px;

@@ -5,13 +5,14 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/user'
 import { ElMessageBox, ElMessage } from 'element-plus'
+
 const router = useRouter()
 const route = useRoute()
-const store = useStore()
+const userStore = useUserStore()
 
-const currentUser = computed(() => store.getters.currentUser)
+const currentUser = computed(() => userStore.userInfo)
 const activeMenu = computed(() => route.path)
 
 const lastOrders = [
@@ -43,8 +44,5 @@ function logout() {
   font-weight: 500;
   transition: background 0.2s;
 }
-.sidebar-menu .el-menu-item.is-active {
-  background: #222;
-  color: #fff !important;
-}
+
 </style>

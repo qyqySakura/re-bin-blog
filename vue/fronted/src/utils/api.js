@@ -116,6 +116,40 @@ export const commentApi = {
   deleteComment: (id) => request.delete(`/comments/del/${id}`)
 }
 
+// 博客前台API
+export const blogApi = {
+  // 获取首页文章列表
+  getPosts: (params) => request.get('/api/blog/posts', { params }),
+  // 获取文章详情
+  getPostDetail: (id) => request.get(`/api/blog/posts/${id}`),
+  // 获取已发布文章列表
+  getPublishedPosts: (page = 1, size = 10) => request.get('/posts/published', {
+    params: { page, size }
+  }),
+  // 搜索文章
+  searchPosts: (keyword, params) => request.get('/api/blog/search', {
+    params: { keyword, ...params }
+  }),
+  // 获取分类列表（包含文章数量）
+  getCategories: () => request.get('/api/blog/categories'),
+  // 获取标签列表（包含文章数量）
+  getTags: () => request.get('/api/blog/tags'),
+  // 获取文章标签
+  getPostTags: (postId) => request.get(`/tags/post/${postId}`),
+  // 获取热门文章
+  getHotPosts: (limit = 5) => request.get('/api/blog/posts/popular', {
+    params: { limit }
+  }),
+  // 获取文章归档
+  getArchives: () => request.get('/api/blog/archives'),
+  // 获取网站统计
+  getStatistics: () => request.get('/api/blog/statistics'),
+  // 点赞文章
+  togglePostLike: (postId) => request.post(`/api/blog/posts/${postId}/like`),
+  // 获取首页数据
+  getHomeData: () => request.get('/api/blog/home')
+}
+
 // 通用API
 export const commonApi = {
   // 上传头像

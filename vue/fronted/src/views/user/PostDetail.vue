@@ -117,14 +117,14 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { User, Calendar, Folder, ArrowLeft } from '@element-plus/icons-vue'
 import { postApi, commentApi } from '@/utils/api'
 
 const route = useRoute()
 const router = useRouter()
-const store = useStore()
+const userStore = useUserStore()
 
 // 响应式数据
 const loading = ref(false)
@@ -139,8 +139,8 @@ const newComment = ref({
 })
 
 // 计算属性
-const isLoggedIn = computed(() => store.getters.isAuthenticated)
-const currentUser = computed(() => store.getters.currentUser)
+const isLoggedIn = computed(() => userStore.isLoggedIn)
+const currentUser = computed(() => userStore.userInfo)
 
 // 获取文章详情
 const fetchPost = async () => {

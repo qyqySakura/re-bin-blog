@@ -199,8 +199,8 @@
             <!-- 分页组件 -->
             <div class="pagination-container" v-if="total > 0">
               <el-pagination
-                v-model:current-page="currentPage"
-                v-model:page-size="pageSize"
+                :current-page="currentPage"
+                :page-size="pageSize"
                 :total="total"
                 :page-sizes="[6, 12, 24]"
                 layout="total, sizes, prev, pager, next, jumper"
@@ -319,109 +319,56 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import {
   House, Calendar, Folder, CollectionTag, User, Search,
   Moon, Sunny, Document, SwitchButton, ArrowDown, View,
   ArrowRight
 } from '@element-plus/icons-vue'
-import * as blogApi from '@/api/blog'
+import { useBlogStore } from '@/stores/blog'
+import { useUserStore } from '@/stores/user'
+import { formatDate } from '@/utils/date'
 
 const router = useRouter()
-const store = useStore()
+const blogStore = useBlogStore()
+const userStore = useUserStore()
 
 // 响应式数据
-const loading = ref(false)
 const isDark = ref(false)
 const searchKeyword = ref('')
 const sortBy = ref('latest')
-const articles = ref([])
-const categories = ref([])
-const tags = ref([])
-const currentPage = ref(1)
-const pageSize = ref(6)
-const total = ref(0)
 
 // 计算属性
-const isLoggedIn = computed(() => store.getters.isAuthenticated)
-const currentUser = computed(() => store.getters.currentUser)
+const isLoggedIn = computed(() => userStore.isLoggedIn)
+const currentUser = computed(() => userStore.userInfo)
+const loading = computed(() => blogStore.loading)
+const articles = computed(() => blogStore.posts)
+const categories = computed(() => blogStore.categories)
+const tags = computed(() => blogStore.tags)
+const currentPage = computed({
+  get: () => blogStore.pagination.page,
+  set: (value) => blogStore.pagination.page = value
+})
+const pageSize = computed({
+  get: () => blogStore.pagination.size,
+  set: (value) => blogStore.pagination.size = value
+})
+const total = computed(() => blogStore.pagination.total)
 
 
 
-// 获取文章列表
-const fetchArticles = async () => {
-  loading.value = true
+// 获取首页数据
+const fetchHomeData = async () => {
   try {
-    const response = await blogApi.getHomePosts(currentPage.value, pageSize.value)
-    if (response.code === 200) {
-      articles.value = response.data.posts || []
-      total.value = response.data.total || 0
-    } else {
-      ElMessage.error(response.message || '获取文章列表失败')
-    }
+    await Promise.all([
+      blogStore.fetchPosts({ page: 1, size: pageSize.value }),
+      blogStore.fetchCategories(),
+      blogStore.fetchTags()
+    ])
   } catch (error) {
-    console.error('获取文章列表失败:', error)
-    ElMessage.error('获取文章列表失败')
-    // 使用模拟数据作为后备
-    articles.value = [
-      {
-        id: 1,
-        title: '示例文章',
-        summary: '这是一篇示例文章，当API请求失败时显示。',
-        cover: 'https://picsum.photos/400/200?random=1',
-        author: { name: 'RE-BIN' },
-        category: { name: '示例分类' },
-        createTime: new Date().toISOString()
-      }
-    ]
-    total.value = 1
-  } finally {
-    loading.value = false
+    console.error('获取首页数据失败:', error)
+    ElMessage.error('获取数据失败，请刷新页面重试')
   }
-}
-
-// 获取分类列表
-const fetchCategories = async () => {
-  try {
-    const response = await blogApi.getCategories()
-    if (response.code === 200) {
-      categories.value = response.data || []
-    } else {
-      ElMessage.error(response.message || '获取分类列表失败')
-    }
-  } catch (error) {
-    console.error('获取分类列表失败:', error)
-    // 使用模拟数据作为后备
-    categories.value = [
-      { id: 1, name: '示例分类', postCount: 1 }
-    ]
-  }
-}
-
-// 获取标签列表
-const fetchTags = async () => {
-  try {
-    const response = await blogApi.getTags()
-    if (response.code === 200) {
-      tags.value = response.data || []
-    } else {
-      ElMessage.error(response.message || '获取标签列表失败')
-    }
-  } catch (error) {
-    console.error('获取标签列表失败:', error)
-    // 使用模拟数据作为后备
-    tags.value = [
-      { id: 1, name: '示例标签' }
-    ]
-  }
-}
-
-// 格式化日期
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return date.toLocaleDateString('zh-CN')
 }
 
 // 跳转到文章详情
@@ -455,7 +402,7 @@ const toggleTheme = () => {
 // 退出登录
 const handleLogout = async () => {
   try {
-    await store.dispatch('logout')
+    await userStore.logout()
     ElMessage.success('退出登录成功')
     router.push('/')
   } catch (error) {
@@ -472,14 +419,14 @@ const scrollToContent = () => {
 
 // 分页处理
 const handleSizeChange = (newSize) => {
-  pageSize.value = newSize
-  currentPage.value = 1
-  fetchArticles()
+  blogStore.pagination.size = newSize
+  blogStore.pagination.page = 1
+  fetchHomeData()
 }
 
 const handleCurrentChange = (newPage) => {
-  currentPage.value = newPage
-  fetchArticles()
+  blogStore.pagination.page = newPage
+  fetchHomeData()
 }
 
 // 初始化主题
@@ -490,11 +437,13 @@ const initTheme = () => {
 }
 
 // 初始化
-onMounted(() => {
+onMounted(async () => {
   initTheme()
-  fetchArticles()
-  fetchCategories()
-  fetchTags()
+  await fetchHomeData()
+  // 如果用户已登录但没有用户信息，获取用户信息
+  if (userStore.token && !userStore.userInfo) {
+    await userStore.initUser()
+  }
 })
 </script>
 

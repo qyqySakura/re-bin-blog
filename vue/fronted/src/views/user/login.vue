@@ -118,12 +118,12 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
 import { ElMessage } from 'element-plus'
 import { User, Lock, House } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
-const store = useStore()
+const userStore = useUserStore()
 
 // 响应式数据
 const loading = ref(false)
@@ -161,7 +161,7 @@ const handleLogin = async () => {
     await loginFormRef.value.validate()
     loading.value = true
     
-    const response = await store.dispatch('login', {
+    const response = await userStore.login({
       username: loginForm.username,
       password: loginForm.password,
       remember: rememberMe.value

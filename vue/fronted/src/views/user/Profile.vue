@@ -144,8 +144,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { userApi } from '@/utils/api'
-import { getCurrentUser, updateUserInfo, uploadAvatar } from '@/api/blog'
+import { userApi, commonApi } from '@/utils/api'
 
 // 响应式数据
 const saving = ref(false)
@@ -222,7 +221,7 @@ const passwordRules = {
 // 获取用户信息
 const fetchUserInfo = async () => {
   try {
-    const response = await getCurrentUser()
+    const response = await commonApi.getCurrentUser()
     if (response.code === 200) {
       const userData = response.data.user
       userInfo.value = {
@@ -274,7 +273,7 @@ const handleSave = async () => {
     }
 
     // 调用更新API
-    const response = await updateUserInfo(updateData)
+    const response = await userApi.updateProfile(updateData)
 
     if (response.code === 200) {
       // 更新本地用户信息
@@ -370,7 +369,7 @@ const confirmAvatarUpload = async () => {
     const formData = new FormData()
     formData.append('file', newAvatarFile.value)
 
-    const response = await uploadAvatar(formData)
+    const response = await userApi.uploadAvatar(formData)
 
     if (response.code === 200) {
       userInfo.value.avatar = response.data

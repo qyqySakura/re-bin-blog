@@ -20,6 +20,7 @@ import PostManage from '../views/admin/PostManage.vue'
 import CategoryManage from '../views/admin/CategoryManage.vue'
 import TagManage from '../views/admin/TagManage.vue'
 import CommentManage from '../views/admin/CommentManage.vue'
+import Test from '../views/Test.vue'
 
 
 const routes = [
@@ -146,6 +147,11 @@ const routes = [
         path: 'search',
         component: Search,
         meta: { title: '搜索结果' }
+      },
+      {
+        path: 'test',
+        component: Test,
+        meta: { title: '功能测试' }
       }
     ]
   },
