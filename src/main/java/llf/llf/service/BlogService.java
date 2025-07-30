@@ -35,6 +35,12 @@ public interface BlogService {
      * 搜索文章
      */
     List<Post> searchPosts(String keyword);
+
+    /**
+     * 搜索文章（支持分页和过滤）
+     */
+    Map<String, Object> searchPostsWithPaging(String keyword, int page, int pageSize,
+                                            String sortBy, Integer categoryId, String timeRange);
     
     /**
      * 获取文章归档（按年月分组）
@@ -120,4 +126,11 @@ public interface BlogService {
      * 获取网站基本信息
      */
     Map<String, Object> getSiteInfo();
+
+    // ==================== 友链相关 ====================
+
+    /**
+     * 获取所有友链
+     */
+    List<FriendLink> getFriendLinks();
 }

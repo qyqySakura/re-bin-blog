@@ -121,7 +121,7 @@ CREATE TABLE `comment` (
   KEY `idx_parent_id` (`parent_id`),
   CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`),
   CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -130,7 +130,7 @@ CREATE TABLE `comment` (
 
 LOCK TABLES `comment` WRITE;
 /*!40000 ALTER TABLE `comment` DISABLE KEYS */;
-INSERT INTO `comment` VALUES (1,1,2,'很棒的博客，期待更多精彩内容！',NULL,'2025-01-01 11:00:00',1,0),(2,2,2,'这个Spring Boot教程很实用，谢谢分享！',NULL,'2025-01-02 15:00:00',1,0),(3,2,1,'谢谢支持！后续会继续更新更多教程。',2,'2025-01-02 16:00:00',1,0),(4,3,1,'生活需要用心感受，很有感触的文章。',NULL,'2025-01-03 19:00:00',1,0);
+INSERT INTO `comment` VALUES (1,1,2,'很棒的博客，期待更多精彩内容！',NULL,'2025-01-01 11:00:00',1,0),(2,2,2,'这个Spring Boot教程很实用，谢谢分享！',NULL,'2025-01-02 15:00:00',1,0),(3,2,1,'谢谢支持！后续会继续更新更多教程。',2,'2025-01-02 16:00:00',1,0),(4,3,1,'生活需要用心感受，很有感触的文章。',NULL,'2025-01-03 19:00:00',1,0),(5,2,2,'你好',NULL,'2025-07-25 20:45:15',1,0),(6,3,2,'1',NULL,'2025-07-30 14:56:42',1,0);
 /*!40000 ALTER TABLE `comment` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -210,7 +210,7 @@ CREATE TABLE `friend_link` (
   `url` varchar(255) NOT NULL COMMENT '链接',
   `description` varchar(255) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -219,7 +219,7 @@ CREATE TABLE `friend_link` (
 
 LOCK TABLES `friend_link` WRITE;
 /*!40000 ALTER TABLE `friend_link` DISABLE KEYS */;
-INSERT INTO `friend_link` VALUES (1,'binbin','www.baidu.com','百科全书');
+INSERT INTO `friend_link` VALUES (1,'binbin','www.baidu.com','百科全书'),(2,'github','https://gitee.com/sakurafengbinbin','my gitee');
 /*!40000 ALTER TABLE `friend_link` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -289,7 +289,10 @@ CREATE TABLE `post` (
 
 LOCK TABLES `post` WRITE;
 /*!40000 ALTER TABLE `post` DISABLE KEYS */;
-INSERT INTO `post` VALUES (1,1,1,'欢迎来到我的博客','这是我的第一篇博客文章，欢迎大家来到我的个人博客！在这里我会分享技术心得、生活感悟和学习笔记。','欢迎来到我的博客，这里会分享各种有趣的内容',NULL,1,'2025-01-01 10:00:00','2025-01-01 10:00:00',0,0,0),(2,1,1,'Spring Boot 入门指南','Spring Boot 是一个基于 Spring 框架的快速开发框架，它简化了 Spring 应用的配置和部署过程。本文将介绍如何快速上手 Spring Boot 开发。','Spring Boot 快速入门教程，适合初学者',NULL,1,'2025-01-02 14:30:00','2025-01-02 14:30:00',0,0,0),(3,2,2,'今天的生活感悟','生活就像一杯茶，需要慢慢品味。今天在公园散步时，看到了美丽的夕阳，让我想起了很多美好的回忆。','记录今天的生活感悟和心情',NULL,1,'2025-01-03 18:00:00','2025-07-15 18:48:26',0,0,0);
+INSERT INTO `post` VALUES
+(1,1,1,'欢迎来到我的博客','这是我的第一篇博客文章，欢迎大家来到我的个人博客！在这里我会分享技术心得、生活感悟和学习笔记。','欢迎来到我的博客，这里会分享各种有趣的内容','https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop',1,'2025-01-01 10:00:00','2025-07-30 18:17:38',0,0,0),
+(2,1,1,'Spring Boot 入门指南','Spring Boot 是一个基于 Spring 框架的快速开发框架，它简化了 Spring 应用的配置和部署过程。本文将介绍如何快速上手 Spring Boot 开发。','Spring Boot 快速入门教程，适合初学者','https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=400&fit=crop',1,'2025-01-02 14:30:00','2025-07-30 17:39:26',0,0,3),
+(3,2,2,'今天的生活感悟','生活就像一杯茶，需要慢慢品味。今天在公园散步时，看到了美丽的夕阳，让我想起了很多美好的回忆。','记录今天的生活感悟和心情','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-03 18:00:00','2025-07-30 17:39:26',0,0,2);
 /*!40000 ALTER TABLE `post` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -581,4 +584,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-25 17:43:46
+-- Dump completed on 2025-07-30 18:18:09

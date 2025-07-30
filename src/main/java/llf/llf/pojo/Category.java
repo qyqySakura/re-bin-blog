@@ -9,4 +9,5 @@ public class Category {
     private Integer id;
     private String name;        // 分类名称
     private String description; // 分类描述
+    private Integer postCount;  // 文章数量（用于统计显示）
 }

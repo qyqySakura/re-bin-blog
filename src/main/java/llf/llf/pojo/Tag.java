@@ -7,5 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Tag {
     private Integer id;
-    private String name;    // 标签名
+    private String name;        // 标签名
+    private Integer postCount;  // 文章数量（用于统计显示）
 }

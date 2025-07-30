@@ -1,93 +1,5 @@
 <template>
   <div class="modern-blog">
-    <!-- 顶部导航 -->
-    <nav class="top-navbar">
-      <div class="nav-container">
-        <div class="nav-brand">
-          <router-link to="/" class="brand-link">
-            <div class="brand-logo">
-              <span class="logo-text">RE-BIN</span>
-              <span class="logo-subtitle">个人博客</span>
-            </div>
-          </router-link>
-        </div>
-
-        <div class="nav-menu">
-          <router-link to="/" class="nav-item" active-class="active">
-            <el-icon><House /></el-icon>
-            <span>首页</span>
-          </router-link>
-          <router-link to="/archive" class="nav-item" active-class="active">
-            <el-icon><Calendar /></el-icon>
-            <span>归档</span>
-          </router-link>
-          <router-link to="/categories" class="nav-item" active-class="active">
-            <el-icon><Folder /></el-icon>
-            <span>分类</span>
-          </router-link>
-          <router-link to="/tags" class="nav-item" active-class="active">
-            <el-icon><CollectionTag /></el-icon>
-            <span>标签</span>
-          </router-link>
-          <router-link to="/about" class="nav-item" active-class="active">
-            <el-icon><User /></el-icon>
-            <span>关于</span>
-          </router-link>
-        </div>
-
-        <div class="nav-actions">
-          <div class="search-container">
-            <el-input
-              v-model="searchKeyword"
-              placeholder="搜索文章..."
-              class="search-input"
-              @keyup.enter="handleSearch"
-              clearable
-            >
-              <template #prefix>
-                <el-icon><Search /></el-icon>
-              </template>
-            </el-input>
-          </div>
-
-          <el-switch
-            v-model="isDark"
-            class="theme-switch"
-            inline-prompt
-            :active-icon="Moon"
-            :inactive-icon="Sunny"
-            @change="toggleTheme"
-          />
-
-          <div class="auth-section" v-if="!isLoggedIn">
-            <el-button type="primary" @click="$router.push('/user/login')">登录</el-button>
-            <el-button @click="$router.push('/user/register')">注册</el-button>
-          </div>
-
-          <el-dropdown v-else class="user-dropdown">
-            <div class="user-info">
-              <el-avatar :src="currentUser?.avatar" :size="32">
-                {{ currentUser?.name?.charAt(0) }}
-              </el-avatar>
-              <span class="username">{{ currentUser?.name }}</span>
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="$router.push('/user/profile')">
-                  <el-icon><User /></el-icon>个人中心
-                </el-dropdown-item>
-                <el-dropdown-item @click="$router.push('/user/posts')">
-                  <el-icon><Document /></el-icon>我的文章
-                </el-dropdown-item>
-                <el-dropdown-item divided @click="handleLogout">
-                  <el-icon><SwitchButton /></el-icon>退出登录
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </div>
-    </nav>
 
     <!-- 主横幅区域 -->
     <section class="hero-banner">
@@ -150,7 +62,12 @@
                 @click="goToPost(article.id)"
               >
                 <div class="article-cover" v-if="article.cover">
-                  <img :src="article.cover" :alt="article.title" />
+                  <img
+                    :src="article.cover"
+                    :alt="article.title"
+                    @error="handleImageError"
+                    loading="lazy"
+                  />
                   <div class="cover-overlay">
                     <el-icon class="read-icon"><View /></el-icon>
                   </div>
@@ -295,9 +212,22 @@
           <div class="footer-section">
             <h4>友情链接</h4>
             <div class="links">
-              <a href="#">GitHub</a>
-              <a href="#">掘金</a>
-              <a href="#">CSDN</a>
+              <a
+                v-for="link in friendLinks.slice(0, 6)"
+                :key="link.id"
+                @click="openFriendLink(link.url)"
+                :title="link.description"
+                style="cursor: pointer;"
+              >
+                {{ link.name }}
+              </a>
+              <router-link
+                to="/friendlinks"
+                class="more-link"
+                v-if="friendLinks.length > 6"
+              >
+                更多 →
+              </router-link>
             </div>
           </div>
           <div class="footer-section">
@@ -321,26 +251,22 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
-  House, Calendar, Folder, CollectionTag, User, Search,
-  Moon, Sunny, Document, SwitchButton, ArrowDown, View,
-  ArrowRight
+  ArrowDown, View, ArrowRight
 } from '@element-plus/icons-vue'
 import { useBlogStore } from '@/stores/blog'
 import { useUserStore } from '@/stores/user'
 import { formatDate } from '@/utils/date'
+import { blogApi } from '@/utils/api'
 
 const router = useRouter()
 const blogStore = useBlogStore()
 const userStore = useUserStore()
 
 // 响应式数据
-const isDark = ref(false)
-const searchKeyword = ref('')
 const sortBy = ref('latest')
+const friendLinks = ref([])
 
 // 计算属性
-const isLoggedIn = computed(() => userStore.isLoggedIn)
-const currentUser = computed(() => userStore.userInfo)
 const loading = computed(() => blogStore.loading)
 const articles = computed(() => blogStore.posts)
 const categories = computed(() => blogStore.categories)
@@ -357,13 +283,26 @@ const total = computed(() => blogStore.pagination.total)
 
 
 
+// 获取友链数据
+const fetchFriendLinks = async () => {
+  try {
+    const response = await blogApi.getFriendLinks()
+    if (response.code === 200) {
+      friendLinks.value = response.data
+    }
+  } catch (error) {
+    console.error('获取友链数据失败:', error)
+  }
+}
+
 // 获取首页数据
 const fetchHomeData = async () => {
   try {
     await Promise.all([
       blogStore.fetchPosts({ page: 1, size: pageSize.value }),
       blogStore.fetchCategories(),
-      blogStore.fetchTags()
+      blogStore.fetchTags(),
+      fetchFriendLinks()
     ])
   } catch (error) {
     console.error('获取首页数据失败:', error)
@@ -386,29 +325,28 @@ const filterByTag = (tagId) => {
   router.push(`/tag/${tagId}`)
 }
 
-// 搜索处理
-const handleSearch = () => {
-  if (searchKeyword.value.trim()) {
-    router.push(`/search?q=${encodeURIComponent(searchKeyword.value)}`)
+// 打开友链
+const openFriendLink = (url) => {
+  if (!url) return
+
+  // 确保URL有协议前缀
+  let fullUrl = url
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    fullUrl = 'https://' + url
   }
+
+  // 在新窗口打开
+  window.open(fullUrl, '_blank')
 }
 
-// 主题切换
-const toggleTheme = () => {
-  document.documentElement.classList.toggle('dark', isDark.value)
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
+// 处理图片加载错误
+const handleImageError = (event) => {
+  console.error('图片加载失败:', event.target.src)
+  // 设置默认图片
+  event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop'
 }
 
-// 退出登录
-const handleLogout = async () => {
-  try {
-    await userStore.logout()
-    ElMessage.success('退出登录成功')
-    router.push('/')
-  } catch (error) {
-    ElMessage.error('退出登录失败')
-  }
-}
+
 
 // 滚动到内容区域
 const scrollToContent = () => {
@@ -429,16 +367,8 @@ const handleCurrentChange = (newPage) => {
   fetchHomeData()
 }
 
-// 初始化主题
-const initTheme = () => {
-  const savedTheme = localStorage.getItem('theme')
-  isDark.value = savedTheme === 'dark'
-  document.documentElement.classList.toggle('dark', isDark.value)
-}
-
 // 初始化
 onMounted(async () => {
-  initTheme()
   await fetchHomeData()
   // 如果用户已登录但没有用户信息，获取用户信息
   if (userStore.token && !userStore.userInfo) {
@@ -455,119 +385,7 @@ onMounted(async () => {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* 顶部导航 */
-.top-navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
 
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 70px;
-}
-
-.nav-brand .brand-link {
-  text-decoration: none;
-  color: inherit;
-}
-
-.brand-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.logo-text {
-  font-size: 24px;
-  font-weight: 700;
-  color: #2c3e50;
-  line-height: 1;
-}
-
-.logo-subtitle {
-  font-size: 12px;
-  color: #7f8c8d;
-  margin-top: 2px;
-}
-
-.nav-menu {
-  display: flex;
-  gap: 30px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  text-decoration: none;
-  color: #2c3e50;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
-.nav-item:hover,
-.nav-item.active {
-  background: #3498db;
-  color: white;
-  transform: translateY(-2px);
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.search-container {
-  width: 250px;
-}
-
-.search-input {
-  border-radius: 20px;
-}
-
-.theme-switch {
-  --el-switch-on-color: #3498db;
-  --el-switch-off-color: #95a5a6;
-}
-
-.auth-section {
-  display: flex;
-  gap: 10px;
-}
-
-.user-dropdown .user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 20px;
-  transition: background 0.3s ease;
-}
-
-.user-dropdown .user-info:hover {
-  background: rgba(52, 152, 219, 0.1);
-}
-
-.username {
-  font-weight: 500;
-  color: #2c3e50;
-}
 
 /* 主横幅 */
 .hero-banner {
@@ -1003,6 +821,16 @@ onMounted(async () => {
 
 .links a:hover {
   color: #3498db;
+}
+
+.more-link {
+  color: #3498db !important;
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+.more-link:hover {
+  color: #2980b9 !important;
 }
 
 .contact p {

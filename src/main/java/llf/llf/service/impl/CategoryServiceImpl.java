@@ -43,4 +43,9 @@ public class CategoryServiceImpl implements CategoryService {
     public int deleteById(Integer id) {
         return categoryMapper.deleteById(id);
     }
+
+    @Override
+    public List<Category> selectAllWithPostCount() {
+        return categoryMapper.selectAllWithPostCount();
+    }
 }

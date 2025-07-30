@@ -46,7 +46,12 @@
             @click="goToPost(post.id)"
           >
             <div class="post-cover" v-if="post.cover">
-              <img :src="post.cover" :alt="post.title" />
+              <img
+                :src="post.cover"
+                :alt="post.title"
+                @error="handleImageError"
+                loading="lazy"
+              />
               <div class="cover-overlay">
                 <el-icon class="read-icon"><View /></el-icon>
               </div>
@@ -108,7 +113,7 @@ import { ElMessage } from 'element-plus'
 import { 
   Folder, ArrowLeft, View, User, Calendar 
 } from '@element-plus/icons-vue'
-import { categoryApi, postApi } from '@/utils/api'
+import { blogApi } from '@/utils/api'
 
 const router = useRouter()
 const route = useRoute()
@@ -129,7 +134,7 @@ const isSpecificCategory = computed(() => !!route.params.id)
 const fetchCategories = async () => {
   try {
     loading.value = true
-    const response = await categoryApi.getCategories()
+    const response = await blogApi.getCategories()
     if (response.code === 200) {
       categories.value = response.data
     }
@@ -145,7 +150,7 @@ const fetchCategories = async () => {
 const fetchCategoryPosts = async (categoryId) => {
   try {
     loading.value = true
-    const response = await postApi.getPostsByCategory(categoryId, currentPage.value, pageSize.value)
+    const response = await blogApi.getPostsByCategory(categoryId, currentPage.value, pageSize.value)
     if (response.code === 200) {
       posts.value = response.data.posts
       total.value = response.data.total
@@ -179,6 +184,13 @@ const goToPost = (postId) => {
 // 返回分类列表
 const goBack = () => {
   router.push('/categories')
+}
+
+// 处理图片加载错误
+const handleImageError = (event) => {
+  console.error('图片加载失败:', event.target.src)
+  // 设置默认图片
+  event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop'
 }
 
 // 分页处理

@@ -5,6 +5,7 @@
     <resultMap id="BaseResultMap" type="llf.llf.pojo.Tag">
         <id property="id" column="id" jdbcType="INTEGER"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="postCount" column="post_count" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -57,5 +58,16 @@
     <delete id="deletePostTags">
         DELETE FROM post_tag WHERE post_id = #{postId}
     </delete>
+
+    <!-- 获取所有标签及其文章数量 -->
+    <select id="selectAllWithPostCount" resultMap="BaseResultMap">
+        SELECT t.id, t.name,
+               COALESCE(COUNT(pt.post_id), 0) as post_count
+        FROM tag t
+        LEFT JOIN post_tag pt ON t.id = pt.tag_id
+        LEFT JOIN post p ON pt.post_id = p.id AND p.status = 1
+        GROUP BY t.id, t.name
+        ORDER BY post_count DESC, t.name
+    </select>
 
 </mapper>

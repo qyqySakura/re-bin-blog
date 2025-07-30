@@ -30,4 +30,7 @@ public interface TagMapper extends BaseMapper<Tag> {
     
     // 删除文章的所有标签
     int deletePostTags(@Param("postId") Integer postId);
+
+    // 获取所有标签及其文章数量
+    List<Tag> selectAllWithPostCount();
 }

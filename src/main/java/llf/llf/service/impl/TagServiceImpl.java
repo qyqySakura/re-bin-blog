@@ -55,12 +55,17 @@ public class TagServiceImpl implements TagService {
     public void setPostTags(Integer postId, List<Integer> tagIds) {
         // 先删除文章的所有标签
         tagMapper.deletePostTags(postId);
-        
+
         // 再添加新的标签
         if (tagIds != null && !tagIds.isEmpty()) {
             for (Integer tagId : tagIds) {
                 tagMapper.addPostTag(postId, tagId);
             }
         }
+    }
+
+    @Override
+    public List<Tag> selectAllWithPostCount() {
+        return tagMapper.selectAllWithPostCount();
     }
 }

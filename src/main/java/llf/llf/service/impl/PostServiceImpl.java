@@ -64,4 +64,36 @@ public class PostServiceImpl implements PostService {
     public int countPublishedPosts() {
         return postMapper.countPublishedPosts();
     }
+
+    @Override
+    public List<Post> selectByTagId(Integer tagId) {
+        return postMapper.selectByTagId(tagId);
+    }
+
+    @Override
+    public List<Post> selectByTagIdWithPaging(Integer tagId, Integer page, Integer size) {
+        Integer offset = (page - 1) * size;
+        return postMapper.selectByTagIdWithPaging(tagId, offset, size);
+    }
+
+    @Override
+    public int countPostsByTagId(Integer tagId) {
+        return postMapper.countPostsByTagId(tagId);
+    }
+
+    @Override
+    public List<Post> searchPosts(String keyword) {
+        return postMapper.searchPosts(keyword);
+    }
+
+    @Override
+    public List<Post> selectByCategoryIdWithPaging(Integer categoryId, Integer page, Integer size) {
+        Integer offset = (page - 1) * size;
+        return postMapper.selectByCategoryIdWithPaging(categoryId, offset, size);
+    }
+
+    @Override
+    public int countPostsByCategoryId(Integer categoryId) {
+        return postMapper.countPostsByCategoryId(categoryId);
+    }
 }

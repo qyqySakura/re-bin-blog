@@ -123,4 +123,142 @@
         SELECT COUNT(*) FROM post WHERE status = 1
     </select>
 
+    <!-- 根据标签ID查询文章 -->
+    <select id="selectByTagId" resultMap="PostWithAuthorMap">
+        SELECT p.*,
+               u.id as author_id, u.name as author_name, u.username as author_username, u.avatar as author_avatar,
+               c.name as category_name, c.description as category_description
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        LEFT JOIN category c ON p.category_id = c.id
+        INNER JOIN post_tag pt ON p.id = pt.post_id
+        WHERE pt.tag_id = #{tagId} AND p.status = 1
+        ORDER BY p.create_time DESC
+    </select>
+
+    <!-- 根据标签ID分页查询文章 -->
+    <select id="selectByTagIdWithPaging" resultMap="PostWithAuthorMap">
+        SELECT p.*,
+               u.id as author_id, u.name as author_name, u.username as author_username, u.avatar as author_avatar,
+               c.name as category_name, c.description as category_description
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        LEFT JOIN category c ON p.category_id = c.id
+        INNER JOIN post_tag pt ON p.id = pt.post_id
+        WHERE pt.tag_id = #{tagId} AND p.status = 1
+        ORDER BY p.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 统计标签下的文章数量 -->
+    <select id="countPostsByTagId" resultType="int">
+        SELECT COUNT(*)
+        FROM post p
+        INNER JOIN post_tag pt ON p.id = pt.post_id
+        WHERE pt.tag_id = #{tagId} AND p.status = 1
+    </select>
+
+    <!-- 搜索文章 -->
+    <select id="searchPosts" resultMap="PostWithAuthorMap">
+        SELECT p.*,
+               u.id as author_id, u.name as author_name, u.username as author_username, u.avatar as author_avatar,
+               c.name as category_name, c.description as category_description
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        LEFT JOIN category c ON p.category_id = c.id
+        WHERE p.status = 1
+        AND (p.title LIKE CONCAT('%', #{keyword}, '%') OR p.content LIKE CONCAT('%', #{keyword}, '%'))
+        ORDER BY p.create_time DESC
+    </select>
+
+    <!-- 高级搜索文章 -->
+    <select id="searchPostsAdvanced" resultMap="PostWithAuthorMap">
+        SELECT p.*,
+               u.id as author_id, u.name as author_name, u.username as author_username, u.avatar as author_avatar,
+               c.name as category_name, c.description as category_description
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        LEFT JOIN category c ON p.category_id = c.id
+        WHERE p.status = 1
+        AND (p.title LIKE CONCAT('%', #{keyword}, '%') OR p.content LIKE CONCAT('%', #{keyword}, '%') OR p.summary LIKE CONCAT('%', #{keyword}, '%'))
+        <if test="categoryId != null">
+            AND p.category_id = #{categoryId}
+        </if>
+        <if test="timeRange != null">
+            <choose>
+                <when test="timeRange == 'week'">
+                    AND p.create_time >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+                </when>
+                <when test="timeRange == 'month'">
+                    AND p.create_time >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+                </when>
+                <when test="timeRange == 'year'">
+                    AND p.create_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
+                </when>
+            </choose>
+        </if>
+        <choose>
+            <when test="sortBy == 'latest'">
+                ORDER BY p.create_time DESC
+            </when>
+            <when test="sortBy == 'popular'">
+                ORDER BY p.view_count DESC, p.create_time DESC
+            </when>
+            <otherwise>
+                ORDER BY
+                    CASE
+                        WHEN p.title LIKE CONCAT('%', #{keyword}, '%') THEN 1
+                        WHEN p.summary LIKE CONCAT('%', #{keyword}, '%') THEN 2
+                        ELSE 3
+                    END,
+                    p.create_time DESC
+            </otherwise>
+        </choose>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 统计搜索结果数量 -->
+    <select id="countSearchResults" resultType="int">
+        SELECT COUNT(*)
+        FROM post p
+        WHERE p.status = 1
+        AND (p.title LIKE CONCAT('%', #{keyword}, '%') OR p.content LIKE CONCAT('%', #{keyword}, '%') OR p.summary LIKE CONCAT('%', #{keyword}, '%'))
+        <if test="categoryId != null">
+            AND p.category_id = #{categoryId}
+        </if>
+        <if test="timeRange != null">
+            <choose>
+                <when test="timeRange == 'week'">
+                    AND p.create_time >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+                </when>
+                <when test="timeRange == 'month'">
+                    AND p.create_time >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+                </when>
+                <when test="timeRange == 'year'">
+                    AND p.create_time >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
+                </when>
+            </choose>
+        </if>
+    </select>
+
+    <!-- 根据分类ID分页查询文章 -->
+    <select id="selectByCategoryIdWithPaging" resultMap="PostWithAuthorMap">
+        SELECT p.*,
+               u.id as author_id, u.name as author_name, u.username as author_username, u.avatar as author_avatar,
+               c.name as category_name, c.description as category_description
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        LEFT JOIN category c ON p.category_id = c.id
+        WHERE p.category_id = #{categoryId} AND p.status = 1
+        ORDER BY p.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 统计分类下的文章数量 -->
+    <select id="countPostsByCategoryId" resultType="int">
+        SELECT COUNT(*)
+        FROM post
+        WHERE category_id = #{categoryId} AND status = 1
+    </select>
+
 </mapper>

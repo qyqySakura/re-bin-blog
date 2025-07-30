@@ -30,8 +30,8 @@ public class PostController {
     // 搜索文章（放在/{id}之前，避免路径冲突）
     @GetMapping("/search")
     public Result<List<Post>> searchPosts(@RequestParam String keyword) {
-        // 这里可以实现搜索逻辑，暂时返回空列表
-        return Result.success(postService.selectAll());
+        // 调用实际的搜索逻辑
+        return Result.success(postService.searchPosts(keyword));
     }
 
     // 根据ID查询文章

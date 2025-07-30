@@ -52,7 +52,12 @@
             @click="goToPost(post.id)"
           >
             <div class="post-cover" v-if="post.cover">
-              <img :src="post.cover" :alt="post.title" />
+              <img
+                :src="post.cover"
+                :alt="post.title"
+                @error="handleImageError"
+                loading="lazy"
+              />
               <div class="cover-overlay">
                 <el-icon class="read-icon"><View /></el-icon>
               </div>
@@ -119,7 +124,7 @@ import { ElMessage } from 'element-plus'
 import { 
   ArrowLeft, View, User, Calendar, Folder 
 } from '@element-plus/icons-vue'
-import { tagApi, postApi } from '@/utils/api'
+import { blogApi } from '@/utils/api'
 
 const router = useRouter()
 const route = useRoute()
@@ -152,7 +157,7 @@ const getTagSizeClass = (postCount) => {
 const fetchTags = async () => {
   try {
     loading.value = true
-    const response = await tagApi.getTags()
+    const response = await blogApi.getTags()
     if (response.code === 200) {
       tags.value = response.data.sort((a, b) => (b.postCount || 0) - (a.postCount || 0))
     }
@@ -168,7 +173,7 @@ const fetchTags = async () => {
 const fetchTagPosts = async (tagId) => {
   try {
     loading.value = true
-    const response = await postApi.getPostsByTag(tagId, currentPage.value, pageSize.value)
+    const response = await blogApi.getPostsByTag(tagId, currentPage.value, pageSize.value)
     if (response.code === 200) {
       posts.value = response.data.posts
       total.value = response.data.total
@@ -202,6 +207,13 @@ const goToPost = (postId) => {
 // 返回标签云
 const goBack = () => {
   router.push('/tags')
+}
+
+// 处理图片加载错误
+const handleImageError = (event) => {
+  console.error('图片加载失败:', event.target.src)
+  // 设置默认图片
+  event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop'
 }
 
 // 分页处理

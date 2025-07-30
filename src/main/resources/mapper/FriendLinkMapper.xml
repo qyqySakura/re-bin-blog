@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="llf.llf.mapper.FriendLinkMapper">
+
+    <resultMap id="BaseResultMap" type="llf.llf.pojo.FriendLink">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, url, description
+    </sql>
+
+    <insert id="add" parameterType="llf.llf.pojo.FriendLink" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO friend_link (name, url, description)
+        VALUES (#{name}, #{url}, #{description})
+    </insert>
+
+    <update id="update" parameterType="llf.llf.pojo.FriendLink">
+        UPDATE friend_link SET
+            name = #{name},
+            url = #{url},
+            description = #{description}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM friend_link WHERE id = #{id}
+    </delete>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM friend_link
+        ORDER BY id
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM friend_link
+        WHERE id = #{id}
+    </select>
+
+</mapper>

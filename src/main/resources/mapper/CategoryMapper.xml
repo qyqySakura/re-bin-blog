@@ -6,6 +6,7 @@
         <id property="id" column="id" jdbcType="INTEGER"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="postCount" column="post_count" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -42,6 +43,16 @@
     <select id="selectByName" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM category WHERE name = #{name}
+    </select>
+
+    <!-- 获取所有分类及其文章数量 -->
+    <select id="selectAllWithPostCount" resultMap="BaseResultMap">
+        SELECT c.id, c.name, c.description,
+               COALESCE(COUNT(p.id), 0) as post_count
+        FROM category c
+        LEFT JOIN post p ON c.id = p.category_id AND p.status = 1
+        GROUP BY c.id, c.name, c.description
+        ORDER BY post_count DESC, c.name
     </select>
 
 </mapper>

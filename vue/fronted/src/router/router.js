@@ -11,6 +11,7 @@ import Archive from '../views/user/Archive.vue'
 import Categories from '../views/user/Categories.vue'
 import Tags from '../views/user/Tags.vue'
 import About from '../views/user/About.vue'
+import FriendLinks from '../views/user/FriendLinks.vue'
 import UserProfile from '../views/user/Profile.vue'
 import UserPosts from '../views/user/UserPosts.vue'
 import Search from '../views/user/Search.vue'
@@ -142,6 +143,11 @@ const routes = [
         path: 'about',
         component: About,
         meta: { title: '关于我' }
+      },
+      {
+        path: 'friendlinks',
+        component: FriendLinks,
+        meta: { title: '友情链接' }
       },
       {
         path: 'search',

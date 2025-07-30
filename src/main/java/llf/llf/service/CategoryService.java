@@ -16,4 +16,7 @@ public interface CategoryService {
     int update(Category category);
     
     int deleteById(Integer id);
+
+    // 获取所有分类及其文章数量
+    List<Category> selectAllWithPostCount();
 }

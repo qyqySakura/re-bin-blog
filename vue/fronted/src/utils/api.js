@@ -127,8 +127,15 @@ export const blogApi = {
     params: { page, size }
   }),
   // 搜索文章
-  searchPosts: (keyword, params) => request.get('/api/blog/search', {
-    params: { keyword, ...params }
+  searchPosts: (keyword, params = {}) => request.get('/api/blog/search', {
+    params: {
+      keyword,
+      page: params.page || 1,
+      pageSize: params.pageSize || 10,
+      sortBy: params.sortBy || 'relevance',
+      category: params.category || null,
+      timeRange: params.timeRange || null
+    }
   }),
   // 获取分类列表（包含文章数量）
   getCategories: () => request.get('/api/blog/categories'),
@@ -147,7 +154,9 @@ export const blogApi = {
   // 点赞文章
   togglePostLike: (postId) => request.post(`/api/blog/posts/${postId}/like`),
   // 获取首页数据
-  getHomeData: () => request.get('/api/blog/home')
+  getHomeData: () => request.get('/api/blog/home'),
+  // 获取友链列表
+  getFriendLinks: () => request.get('/api/blog/friendlinks')
 }
 
 // 通用API

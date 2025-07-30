@@ -3,6 +3,8 @@ package llf.llf.service.impl;
 import llf.llf.mapper.*;
 import llf.llf.pojo.*;
 import llf.llf.service.BlogService;
+import llf.llf.service.PostService;
+import llf.llf.service.FriendLinkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,12 @@ public class BlogServiceImpl implements BlogService {
     
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private FriendLinkService friendLinkService;
 
     @Override
     public Map<String, Object> getHomePagePosts(int page, int size) {
@@ -68,9 +76,7 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public List<Post> getPostsByTag(Integer tagId) {
-        // 这里需要在PostMapper中添加根据标签查询的方法
-        // List<Post> posts = postMapper.selectByTagId(tagId);
-        return new ArrayList<>(); // 临时返回空列表
+        return postService.selectByTagId(tagId);
     }
 
     @Override
@@ -79,9 +85,37 @@ public class BlogServiceImpl implements BlogService {
             return new ArrayList<>();
         }
 
-        // 这里需要在PostMapper中添加搜索方法
-        // List<Post> posts = postMapper.searchPosts(keyword);
-        return new ArrayList<>(); // 临时返回空列表
+        return postService.searchPosts(keyword);
+    }
+
+    @Override
+    public Map<String, Object> searchPostsWithPaging(String keyword, int page, int pageSize,
+                                                    String sortBy, Integer categoryId, String timeRange) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("posts", new ArrayList<>());
+            result.put("total", 0);
+            result.put("page", page);
+            result.put("size", pageSize);
+            result.put("totalPages", 0);
+            return result;
+        }
+
+        // 计算偏移量
+        int offset = (page - 1) * pageSize;
+
+        // 获取搜索结果
+        List<Post> posts = postMapper.searchPostsAdvanced(keyword, categoryId, timeRange, sortBy, offset, pageSize);
+        int total = postMapper.countSearchResults(keyword, categoryId, timeRange);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("posts", posts);
+        result.put("total", total);
+        result.put("page", page);
+        result.put("size", pageSize);
+        result.put("totalPages", (int) Math.ceil((double) total / pageSize));
+
+        return result;
     }
 
     @Override
@@ -112,7 +146,7 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public List<Map<String, Object>> getCategoriesWithCount() {
-        List<Category> categories = categoryMapper.selectAll();
+        List<Category> categories = categoryMapper.selectAllWithPostCount();
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Category category : categories) {
@@ -120,11 +154,7 @@ public class BlogServiceImpl implements BlogService {
             item.put("id", category.getId());
             item.put("name", category.getName());
             item.put("description", category.getDescription());
-
-            // 统计该分类下的文章数量
-            List<Post> posts = postMapper.selectByCategoryId(category.getId());
-            long count = posts.stream().filter(post -> post.getStatus() == 1).count();
-            item.put("postCount", count);
+            item.put("postCount", category.getPostCount() != null ? category.getPostCount() : 0);
 
             result.add(item);
         }
@@ -139,16 +169,14 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public List<Map<String, Object>> getTagsWithCount() {
-        List<Tag> tags = tagMapper.selectAll();
+        List<Tag> tags = tagMapper.selectAllWithPostCount();
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Tag tag : tags) {
             Map<String, Object> item = new HashMap<>();
             item.put("id", tag.getId());
             item.put("name", tag.getName());
-
-            // 这里需要统计标签下的文章数量，暂时设为0
-            item.put("postCount", 0);
+            item.put("postCount", tag.getPostCount() != null ? tag.getPostCount() : 0);
 
             result.add(item);
         }
@@ -236,5 +264,10 @@ public class BlogServiceImpl implements BlogService {
         siteInfo.put("version", "1.0.0");
 
         return siteInfo;
+    }
+
+    @Override
+    public List<FriendLink> getFriendLinks() {
+        return friendLinkService.selectAll();
     }
 }

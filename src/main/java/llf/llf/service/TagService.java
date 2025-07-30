@@ -22,4 +22,7 @@ public interface TagService {
     
     // 为文章设置标签
     void setPostTags(Integer postId, List<Integer> tagIds);
+
+    // 获取所有标签及其文章数量
+    List<Tag> selectAllWithPostCount();
 }

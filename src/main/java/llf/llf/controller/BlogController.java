@@ -3,9 +3,11 @@ package llf.llf.controller;
 import llf.llf.common.Result;
 import llf.llf.pojo.*;
 import llf.llf.service.BlogService;
+import llf.llf.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,9 @@ public class BlogController {
 
     @Autowired
     private BlogService blogService;
+
+    @Autowired
+    private PostService postService;
 
     // ==================== 首页相关 ====================
 
@@ -89,12 +94,32 @@ public class BlogController {
     }
 
     /**
-     * 根据分类获取文章列表
+     * 根据分类获取文章列表（支持分页）
      */
     @GetMapping("/categories/{id}/posts")
-    public Result<List<Post>> getPostsByCategory(@PathVariable Integer id) {
-        List<Post> posts = blogService.getPostsByCategory(id);
-        return Result.success(posts);
+    public Result<Map<String, Object>> getPostsByCategory(
+            @PathVariable Integer id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size) {
+
+        // 获取分类信息
+        Category category = blogService.getCategoryDetail(id);
+        if (category == null) {
+            return Result.error(404, "分类不存在");
+        }
+
+        // 分页查询文章
+        List<Post> posts = postService.selectByCategoryIdWithPaging(id, page, size);
+        int total = postService.countPostsByCategoryId(id);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("posts", posts);
+        result.put("total", total);
+        result.put("page", page);
+        result.put("size", size);
+        result.put("category", category);
+
+        return Result.success(result);
     }
 
     // ==================== 标签相关 ====================
@@ -131,23 +156,52 @@ public class BlogController {
     }
 
     /**
-     * 根据标签获取文章列表
+     * 根据标签获取文章列表（支持分页）
      */
     @GetMapping("/tags/{id}/posts")
-    public Result<List<Post>> getPostsByTag(@PathVariable Integer id) {
-        List<Post> posts = blogService.getPostsByTag(id);
-        return Result.success(posts);
+    public Result<Map<String, Object>> getPostsByTag(
+            @PathVariable Integer id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size) {
+
+        // 获取标签信息
+        Tag tag = blogService.getTagDetail(id);
+        if (tag == null) {
+            return Result.error(404, "标签不存在");
+        }
+
+        // 分页查询文章
+        List<Post> posts = postService.selectByTagIdWithPaging(id, page, size);
+        int total = postService.countPostsByTagId(id);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("posts", posts);
+        result.put("total", total);
+        result.put("page", page);
+        result.put("size", size);
+        result.put("tag", tag);
+
+        return Result.success(result);
     }
 
     // ==================== 搜索相关 ====================
 
     /**
-     * 搜索文章
+     * 搜索文章（支持分页和过滤）
      */
     @GetMapping("/search")
-    public Result<List<Post>> searchPosts(@RequestParam String keyword) {
-        List<Post> posts = blogService.searchPosts(keyword);
-        return Result.success(posts);
+    public Result<Map<String, Object>> searchPosts(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "relevance") String sortBy,
+            @RequestParam(required = false) Integer category,
+            @RequestParam(required = false) String timeRange) {
+
+        Map<String, Object> result = blogService.searchPostsWithPaging(
+            keyword, page, pageSize, sortBy, category, timeRange
+        );
+        return Result.success(result);
     }
 
     // ==================== 归档相关 ====================
@@ -241,5 +295,16 @@ public class BlogController {
     public Result<Map<String, Object>> getSiteInfo() {
         Map<String, Object> siteInfo = blogService.getSiteInfo();
         return Result.success(siteInfo);
+    }
+
+    // ==================== 友链相关 ====================
+
+    /**
+     * 获取所有友链
+     */
+    @GetMapping("/friendlinks")
+    public Result<List<FriendLink>> getFriendLinks() {
+        List<FriendLink> friendLinks = blogService.getFriendLinks();
+        return Result.success(friendLinks);
     }
 }

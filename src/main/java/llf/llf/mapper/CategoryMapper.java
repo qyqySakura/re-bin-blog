@@ -21,4 +21,7 @@ public interface CategoryMapper extends BaseMapper<Category> {
     int update(Category category);
     
     int deleteById(@Param("id") Integer id);
+
+    // 获取所有分类及其文章数量
+    List<Category> selectAllWithPostCount();
 }

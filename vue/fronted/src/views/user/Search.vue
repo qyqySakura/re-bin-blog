@@ -104,7 +104,12 @@
               </div>
             </div>
             <div class="result-cover" v-if="result.cover">
-              <img :src="result.cover" :alt="result.title" />
+              <img
+                :src="result.cover"
+                :alt="result.title"
+                @error="handleImageError"
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
@@ -133,17 +138,37 @@
             <el-icon size="80" color="#409eff"><Search /></el-icon>
             <h3>开始搜索</h3>
             <p>输入关键词搜索文章内容</p>
-            <div class="popular-searches">
-              <h4>热门搜索:</h4>
-              <div class="popular-tags">
-                <el-tag 
-                  v-for="tag in popularSearches" 
-                  :key="tag"
-                  @click="searchKeyword = tag; handleSearch()"
-                  class="popular-tag"
-                >
-                  {{ tag }}
-                </el-tag>
+            <div class="search-suggestions">
+              <!-- 搜索历史 -->
+              <div class="search-history" v-if="searchHistory.length > 0">
+                <h4>搜索历史:</h4>
+                <div class="history-tags">
+                  <el-tag
+                    v-for="item in searchHistory.slice(0, 5)"
+                    :key="item"
+                    @click="searchKeyword = item; handleSearch()"
+                    class="history-tag"
+                    closable
+                    @close="removeSearchHistory(item)"
+                  >
+                    {{ item }}
+                  </el-tag>
+                </div>
+              </div>
+
+              <!-- 热门搜索 -->
+              <div class="popular-searches">
+                <h4>热门搜索:</h4>
+                <div class="popular-tags">
+                  <el-tag
+                    v-for="tag in popularSearches"
+                    :key="tag"
+                    @click="searchKeyword = tag; handleSearch()"
+                    class="popular-tag"
+                  >
+                    {{ tag }}
+                  </el-tag>
+                </div>
               </div>
             </div>
           </div>
@@ -172,7 +197,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, User, Calendar, Folder, View } from '@element-plus/icons-vue'
-import { postApi, categoryApi } from '@/utils/api'
+import { blogApi, categoryApi } from '@/utils/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -191,9 +216,13 @@ const categoryFilter = ref('')
 const timeFilter = ref('')
 
 const popularSearches = ref([
-  'Vue3', 'JavaScript', 'TypeScript', 'Node.js', 'React', 
+  'Vue3', 'JavaScript', 'TypeScript', 'Node.js', 'React',
   '前端开发', '后端开发', '数据库', 'CSS', 'HTML'
 ])
+
+const searchHistory = ref([])
+const searchSuggestions = ref([])
+const showSuggestions = ref(false)
 
 // 获取分类列表
 const fetchCategories = async () => {
@@ -207,6 +236,33 @@ const fetchCategories = async () => {
   }
 }
 
+// 保存搜索历史
+const saveSearchHistory = (keyword) => {
+  if (!keyword.trim()) return
+
+  const history = JSON.parse(localStorage.getItem('searchHistory') || '[]')
+  const filteredHistory = history.filter(item => item !== keyword)
+  filteredHistory.unshift(keyword)
+
+  // 只保留最近10条搜索记录
+  const newHistory = filteredHistory.slice(0, 10)
+  localStorage.setItem('searchHistory', JSON.stringify(newHistory))
+  searchHistory.value = newHistory
+}
+
+// 加载搜索历史
+const loadSearchHistory = () => {
+  const history = JSON.parse(localStorage.getItem('searchHistory') || '[]')
+  searchHistory.value = history
+}
+
+// 删除搜索历史项
+const removeSearchHistory = (keyword) => {
+  const history = searchHistory.value.filter(item => item !== keyword)
+  searchHistory.value = history
+  localStorage.setItem('searchHistory', JSON.stringify(history))
+}
+
 // 搜索处理
 const handleSearch = async () => {
   if (!searchKeyword.value.trim()) {
@@ -217,21 +273,24 @@ const handleSearch = async () => {
   try {
     loading.value = true
     searchQuery.value = searchKeyword.value
-    
+    showSuggestions.value = false
+
+    // 保存搜索历史
+    saveSearchHistory(searchKeyword.value)
+
     const params = {
-      keyword: searchKeyword.value,
       page: currentPage.value,
       pageSize: pageSize.value,
       sortBy: sortBy.value,
       category: categoryFilter.value,
       timeRange: timeFilter.value
     }
-    
-    const response = await postApi.searchPosts(params)
+
+    const response = await blogApi.searchPosts(searchKeyword.value, params)
     if (response.code === 200) {
-      searchResults.value = response.data.posts
-      total.value = response.data.total
-      
+      searchResults.value = response.data.posts || []
+      total.value = response.data.total || 0
+
       // 更新URL
       router.replace({
         path: '/search',
@@ -285,10 +344,18 @@ watch(() => route.query.q, (newQuery) => {
   }
 }, { immediate: true })
 
+// 处理图片加载错误
+const handleImageError = (event) => {
+  console.error('图片加载失败:', event.target.src)
+  // 设置默认图片
+  event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop'
+}
+
 // 初始化
 onMounted(() => {
   fetchCategories()
-  
+  loadSearchHistory()
+
   // 从URL获取搜索关键词
   if (route.query.q) {
     searchKeyword.value = route.query.q
@@ -477,11 +544,23 @@ onMounted(() => {
   margin-bottom: 40px;
 }
 
+.search-suggestions {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-history {
+  margin-bottom: 30px;
+}
+
+.search-history h4,
 .popular-searches h4 {
   color: #2c3e50;
   margin-bottom: 15px;
+  font-size: 1.1rem;
 }
 
+.history-tags,
 .popular-tags {
   display: flex;
   gap: 10px;
@@ -489,11 +568,19 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
+.history-tag,
 .popular-tag {
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
+.history-tag {
+  background: #e8f4fd;
+  color: #409eff;
+  border-color: #b3d8ff;
+}
+
+.history-tag:hover,
 .popular-tag:hover {
   transform: scale(1.05);
 }
