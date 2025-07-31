@@ -1,5 +1,6 @@
 // src/router/router.js
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import AdminLayout from '../layout/AdminLayout.vue'
 import BlogLayout from '../layout/BlogLayout.vue'
 import AdminLogin from '../views/admin/login.vue'
@@ -96,7 +97,12 @@ const routes = [
   {
     path: '/user/posts',
     component: UserPosts,
-    meta: { requiresAuth: true, title: '我的文章' }
+    meta: { requiresAuth: true, requiresBlogAuthor: true, title: '我的文章' }
+  },
+  {
+    path: '/user/edit',
+    component: () => import('../views/user/PostEdit.vue'),
+    meta: { requiresAuth: true, requiresBlogAuthor: true, title: '编辑文章' }
   },
 
   // 博客前台
@@ -205,6 +211,29 @@ router.beforeEach(async (to, from, next) => {
       if (to.meta.role === 'admin' && userType !== 'admin') {
         // 需要管理员权限但当前是普通用户
         next('/login')
+        return
+      }
+    }
+
+    // 检查是否需要网站作者权限
+    if (to.meta.requiresBlogAuthor) {
+      try {
+        // 获取用户信息
+        const userStore = useUserStore()
+        await userStore.fetchUserInfo()
+
+        // 检查是否为网站作者(ID=1)或管理员
+        const isAdmin = userType === 'admin'
+        const isBlogAuthor = userStore.userInfo && userStore.userInfo.id === 1
+
+        if (!isAdmin && !isBlogAuthor) {
+          // 不是管理员也不是网站作者，拒绝访问
+          next('/')
+          return
+        }
+      } catch (error) {
+        console.error('获取用户信息失败:', error)
+        next('/user/login')
         return
       }
     }

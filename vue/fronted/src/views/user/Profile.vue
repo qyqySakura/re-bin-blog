@@ -11,7 +11,7 @@
         <div class="profile-card">
           <div class="profile-header">
             <div class="avatar-section">
-              <el-avatar :src="userInfo.avatar" :size="100">
+              <el-avatar :src="getAvatarUrl(userInfo.avatar)" :size="100">
                 {{ userInfo.name?.charAt(0) }}
               </el-avatar>
               <el-button type="primary" @click="showAvatarUpload = true">
@@ -145,6 +145,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { userApi, commonApi } from '@/utils/api'
+import { getAvatarUrl } from '@/utils/avatar'
 
 // 响应式数据
 const saving = ref(false)
@@ -221,7 +222,7 @@ const passwordRules = {
 // 获取用户信息
 const fetchUserInfo = async () => {
   try {
-    const response = await commonApi.getCurrentUser()
+    const response = await userApi.getUserInfo()
     if (response.code === 200) {
       const userData = response.data.user
       userInfo.value = {
@@ -242,6 +243,12 @@ const fetchUserInfo = async () => {
   } catch (error) {
     console.error('获取用户信息失败:', error)
     ElMessage.error('获取用户信息失败')
+    // 如果获取用户信息失败，可能是未登录，跳转到登录页
+    if (error.message === '未登录') {
+      ElMessage.warning('请先登录')
+      // 可以选择跳转到登录页
+      // router.push('/user/login')
+    }
   }
 }
 
@@ -372,6 +379,7 @@ const confirmAvatarUpload = async () => {
     const response = await userApi.uploadAvatar(formData)
 
     if (response.code === 200) {
+      // 后端返回的是相对路径，直接保存
       userInfo.value.avatar = response.data
       showAvatarUpload.value = false
       newAvatar.value = ''

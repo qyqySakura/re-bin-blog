@@ -2,8 +2,11 @@
   <el-dialog v-model="dialogVisible" title="用户信息" :show-close="false">
     <el-form :model="form" label-width="120px">
       <el-form-item label="头像">
-        <el-image style="width: 40px; height: 40px; border-radius: 50%; display: block" v-if="scope.row.avatar"
-                  :src="scope.row.avatar" :preview-src-list="[scope.row.avatar]" preview-teleported></el-image>
+        <el-image style="width: 40px; height: 40px; border-radius: 50%; display: block" v-if="form.avatar"
+                  :src="getAvatarUrl(form.avatar)" :preview-src-list="[getAvatarUrl(form.avatar)]" preview-teleported></el-image>
+        <el-avatar v-else :size="40">
+          {{ form.name?.charAt(0) || form.username?.charAt(0) || '用' }}
+        </el-avatar>
       </el-form-item>
 
       <el-form-item label="姓名">
@@ -27,7 +30,8 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, ref } from 'vue'
+import { getAvatarUrl } from '@/utils/avatar'
 
 const props = defineProps(['formData'])
 const emit = defineEmits(['submit'])

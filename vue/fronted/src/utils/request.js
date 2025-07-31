@@ -12,7 +12,10 @@ service.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token')
     if (token) {
+      // 设置Sa-Token配置的token名称
       config.headers['satoken'] = token
+      // 同时设置标准的Authorization头，确保兼容性
+      config.headers['Authorization'] = token
     }
     return config
   },

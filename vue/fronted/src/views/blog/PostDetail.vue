@@ -20,7 +20,7 @@
           <div class="user-section" v-if="userStore.isLoggedIn">
             <el-dropdown>
               <div class="user-info">
-                <el-avatar :size="32" :src="userStore.userInfo?.avatar">
+                <el-avatar :size="32" :src="getAvatarUrl(userStore.userInfo?.avatar)">
                   {{ userStore.userInfo?.name?.charAt(0) }}
                 </el-avatar>
               </div>
@@ -57,7 +57,7 @@
               <div class="post-meta">
                 <div class="meta-left">
                   <div class="author-info">
-                    <el-avatar :src="post.author?.avatar" :size="40">
+                    <el-avatar :src="getAvatarUrl(post.author?.avatar)" :size="40">
                       {{ post.author?.name?.charAt(0) || '匿' }}
                     </el-avatar>
                     <div class="author-details">
@@ -268,6 +268,7 @@ import { useUserStore } from '@/stores/user'
 import { commentApi } from '@/utils/api.js'
 import { formatDate } from '@/utils/date'
 import { copyToClipboard } from '@/utils/common'
+import { getAvatarUrl } from '@/utils/avatar'
 import { ElMessage } from 'element-plus'
 import {
   ArrowLeft, Share, View, ChatDotRound, Star, Folder, 

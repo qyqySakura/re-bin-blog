@@ -10,14 +10,16 @@
     "clear-cache": "rimraf node_modules/.vite"
   },
   "dependencies": {
-    "axios": "^1.10.0",
-    "vue": "^3.5.17",
-    "vue-router": "^4.5.1",
-    "pinia": "^2.1.7",
-    "element-plus": "^2.4.4",
     "@element-plus/icons-vue": "^2.3.1",
     "@vueuse/core": "^10.5.0",
-    "dayjs": "^1.11.10"
+    "axios": "^1.10.0",
+    "dayjs": "^1.11.10",
+    "element-plus": "^2.4.4",
+    "pinia": "^2.1.7",
+    "quill": "^2.0.3",
+    "vue": "^3.5.17",
+    "vue-quill-editor": "^3.0.6",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",

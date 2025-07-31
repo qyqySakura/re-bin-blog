@@ -125,7 +125,7 @@
           <!-- 用户菜单 -->
           <el-dropdown class="user-dropdown" @command="handleUserCommand">
             <div class="user-info">
-              <el-avatar :src="currentUser?.avatar" :size="32">
+              <el-avatar :src="getAvatarUrl(currentUser?.avatar)" :size="32">
                 {{ currentUser?.name?.charAt(0) }}
               </el-avatar>
               <span class="username">{{ currentUser?.name }}</span>
@@ -189,6 +189,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAdminStore } from '@/stores/admin'
 import { ElMessage } from 'element-plus'
+import { getAvatarUrl } from '@/utils/avatar'
 import {
   Setting, Expand, Fold, Odometer, Document, EditPen, Folder,
   CollectionTag, ChatDotRound, User, Avatar, UserFilled, Tools,

@@ -110,7 +110,7 @@
         <div class="user-section" v-else>
           <el-dropdown @command="handleUserCommand">
             <div class="user-info">
-              <el-avatar :src="userInfo?.avatar" :size="32">
+              <el-avatar :src="getAvatarUrl(userInfo?.avatar)" :size="32">
                 {{ userInfo?.name?.charAt(0) || 'U' }}
               </el-avatar>
               <span class="username">{{ userInfo?.name || '用户' }}</span>
@@ -121,7 +121,8 @@
                 <el-dropdown-item command="profile">
                   <el-icon><User /></el-icon>个人资料
                 </el-dropdown-item>
-                <el-dropdown-item command="posts">
+                <!-- 只有网站作者才显示文章管理 -->
+                <el-dropdown-item v-if="isBlogAuthor" command="posts">
                   <el-icon><Document /></el-icon>我的文章
                 </el-dropdown-item>
                 <el-dropdown-item divided command="logout">
@@ -243,14 +244,15 @@
 
           <div class="mobile-user" v-else>
             <div class="mobile-user-info">
-              <el-avatar :src="userInfo?.avatar" :size="40">
+              <el-avatar :src="getAvatarUrl(userInfo?.avatar)" :size="40">
                 {{ userInfo?.name?.charAt(0) || 'U' }}
               </el-avatar>
               <span class="mobile-username">{{ userInfo?.name || '用户' }}</span>
             </div>
             <div class="mobile-user-actions">
               <el-button @click="handleMobileUserAction('profile')">个人资料</el-button>
-              <el-button @click="handleMobileUserAction('posts')">我的文章</el-button>
+              <!-- 只有网站作者才显示文章管理 -->
+              <el-button v-if="isBlogAuthor" @click="handleMobileUserAction('posts')">我的文章</el-button>
               <el-button type="danger" @click="handleMobileUserAction('logout')">退出登录</el-button>
             </div>
           </div>
@@ -265,6 +267,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
+import { getAvatarUrl } from '@/utils/avatar'
 import {
   House, Calendar, Folder, CollectionTag, User, Search,
   Moon, Sunny, ArrowDown, Document, SwitchButton, Menu, Close, Link, Clock
@@ -282,6 +285,10 @@ const showMobileMenu = ref(false)
 // 计算属性
 const isLoggedIn = computed(() => !!userStore.token)
 const userInfo = computed(() => userStore.userInfo)
+// 判断是否为网站作者（ID=1）
+const isBlogAuthor = computed(() => {
+  return userInfo.value && userInfo.value.id === 1
+})
 
 // 生命周期
 onMounted(() => {

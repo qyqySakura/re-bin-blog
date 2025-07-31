@@ -28,30 +28,33 @@ public class AuthController {
     @GetMapping("/info")
     public Result<Map<String, Object>> getCurrentUser() {
         Map<String, Object> result = new HashMap<>();
-        
-        // 检查管理员登录状态
-        if (SaTokenUtil.isLogin("admin")) {
 
-            Object adminId = SaTokenUtil.getLoginId("admin");
+        // 检查是否已登录
+        if (SaTokenUtil.isLogin()) {
+            String loginId = (String) SaTokenUtil.getLoginId();
 
-            Admin admin = adminService.selectById((Integer) adminId);
+            // 根据loginId前缀判断用户类型
+            if (loginId.startsWith("admin_")) {
+                // 管理员登录
+                Integer adminId = Integer.parseInt(loginId.substring(6)); // 去掉"admin_"前缀
+                Admin admin = adminService.selectById(adminId);
 
-            result.put("user", admin);
-            result.put("userType", "admin");
-            result.put("token", SaTokenUtil.getTokenValue("admin"));
-            return Result.success(result);
+                result.put("user", admin);
+                result.put("userType", "admin");
+                result.put("token", SaTokenUtil.getTokenValue());
+                return Result.success(result);
+            } else if (loginId.startsWith("user_")) {
+                // 用户登录
+                Integer userId = Integer.parseInt(loginId.substring(5)); // 去掉"user_"前缀
+                User user = userService.selectById(userId);
+
+                result.put("user", user);
+                result.put("userType", "user");
+                result.put("token", SaTokenUtil.getTokenValue());
+                return Result.success(result);
+            }
         }
-        
-        // 检查用户登录状态
-        if (SaTokenUtil.isLogin("user")) {
-            Object userId = SaTokenUtil.getLoginId("user");
-            User user = userService.selectById((Integer) userId);
-            result.put("user", user);
-            result.put("userType", "user");
-            result.put("token", SaTokenUtil.getTokenValue("user"));
-            return Result.success(result);
-        }
-        
+
         return Result.error(401, "未登录");
     }
 

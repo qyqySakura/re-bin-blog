@@ -58,11 +58,12 @@ public class UserController {
 
         User foundUser = userService.login(user.getUsername(), user.getPassword());
         if (foundUser != null) {
-            // 使用Sa-Token登录
-            SaTokenUtil.login(foundUser.getId(), "user");
+            // 使用Sa-Token登录，使用用户ID作为登录标识，并添加用户类型前缀
+            String loginId = "user_" + foundUser.getId();
+            SaTokenUtil.login(loginId);
 
             Map<String, Object> result = new HashMap<>();
-            result.put("token", SaTokenUtil.getTokenValue("user"));
+            result.put("token", SaTokenUtil.getTokenValue());
             result.put("user", foundUser);
 
             System.out.println("用户登录成功 - ID: " + foundUser.getId() + ", 用户名: " + foundUser.getUsername());
@@ -141,7 +142,7 @@ public class UserController {
     // 退出登录
     @PostMapping("/auth/logout")
     public Result<String> logout() {
-        SaTokenUtil.logout("user");
+        SaTokenUtil.logout();
         return Result.success("退出登录成功");
     }
 
@@ -213,12 +214,17 @@ public class UserController {
     @PostMapping("/upload/avatar")
     public Result<String> uploadAvatar(@RequestParam("file") MultipartFile file) throws IOException {
         try {
-            if (!SaTokenUtil.isLogin("user")) {
+            if (!SaTokenUtil.isLogin()) {
                 return Result.error(401, "未登录");
             }
 
-            Object userId = SaTokenUtil.getLoginId("user");
-            String url = avatarService.uploadAvatar(file, "user", (Integer) userId);
+            String loginId = (String) SaTokenUtil.getLoginId();
+            if (!loginId.startsWith("user_")) {
+                return Result.error(403, "权限不足");
+            }
+
+            Integer userId = Integer.parseInt(loginId.substring(5)); // 去掉"user_"前缀
+            String url = avatarService.uploadAvatar(file, "user", userId);
             return Result.success(url);
         } catch (Exception e) {
             return Result.error(500, "头像上传失败：" + e.getMessage());

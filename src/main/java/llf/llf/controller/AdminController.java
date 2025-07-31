@@ -23,13 +23,14 @@ public class AdminController {
     public Result<Map<String, Object>> login(@RequestBody Admin admin) {
         Admin foundAdmin = adminService.login(admin.getUsername(), admin.getPassword());
         if (foundAdmin != null) {
-            // 使用Sa-Token登录
-            SaTokenUtil.login(foundAdmin.getId(), "admin");
-            
+            // 使用Sa-Token登录，使用管理员ID作为登录标识，并添加管理员类型前缀
+            String loginId = "admin_" + foundAdmin.getId();
+            SaTokenUtil.login(loginId);
+
             Map<String, Object> result = new HashMap<>();
-            result.put("token", SaTokenUtil.getTokenValue("admin"));
+            result.put("token", SaTokenUtil.getTokenValue());
             result.put("user", foundAdmin);
-            
+
             return Result.success(result);
         } else {
             return Result.error(400, "用户名或密码错误");
@@ -72,7 +73,7 @@ public class AdminController {
     // 退出登录
     @PostMapping("/auth/logout")
     public Result<String> logout() {
-        SaTokenUtil.logout("admin");
+        SaTokenUtil.logout();
         return Result.success("退出登录成功");
     }
 }

@@ -173,7 +173,10 @@ const fetchTags = async () => {
 const fetchTagPosts = async (tagId) => {
   try {
     loading.value = true
-    const response = await blogApi.getPostsByTag(tagId, currentPage.value, pageSize.value)
+    const response = await blogApi.getPostsByTag(tagId, {
+      page: currentPage.value,
+      size: pageSize.value
+    })
     if (response.code === 200) {
       posts.value = response.data.posts
       total.value = response.data.total

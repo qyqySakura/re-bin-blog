@@ -150,7 +150,10 @@ const fetchCategories = async () => {
 const fetchCategoryPosts = async (categoryId) => {
   try {
     loading.value = true
-    const response = await blogApi.getPostsByCategory(categoryId, currentPage.value, pageSize.value)
+    const response = await blogApi.getPostsByCategory(categoryId, {
+      page: currentPage.value,
+      size: pageSize.value
+    })
     if (response.code === 200) {
       posts.value = response.data.posts
       total.value = response.data.total

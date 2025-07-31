@@ -3,7 +3,7 @@
     <div class="comment-main">
       <!-- 头像 -->
       <div class="comment-avatar">
-        <el-avatar :size="40" :src="comment.user?.avatar">
+        <el-avatar :size="40" :src="getAvatarUrl(comment.user?.avatar)">
           {{ comment.user?.name?.charAt(0) || '匿' }}
         </el-avatar>
       </div>
@@ -104,6 +104,7 @@
 import { ref, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { formatDate, fromNow } from '@/utils/date'
+import { getAvatarUrl } from '@/utils/avatar'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Star, ChatDotRound, Delete } from '@element-plus/icons-vue'
 

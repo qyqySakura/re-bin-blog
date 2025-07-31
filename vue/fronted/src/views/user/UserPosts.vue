@@ -49,8 +49,8 @@
           >
             <div class="post-cover" v-if="post.cover">
               <img :src="post.cover" :alt="post.title" />
-              <div class="post-status" :class="post.status">
-                {{ post.status === 'published' ? '已发布' : '草稿' }}
+              <div class="post-status" :class="post.status === 1 ? 'published' : 'draft'">
+                {{ post.status === 1 ? '已发布' : '草稿' }}
               </div>
             </div>
             
@@ -133,12 +133,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Plus, Search, Calendar, View, Folder, Edit, Delete 
+import {
+  Plus, Search, Calendar, View, Folder, Edit, Delete
 } from '@element-plus/icons-vue'
+import request from '@/utils/request'
 
 const router = useRouter()
 
@@ -151,42 +152,55 @@ const currentPage = ref(1)
 const pageSize = ref(6)
 const total = ref(0)
 
-// 模拟数据
-const mockPosts = [
-  {
-    id: 1,
-    title: 'Vue 3 Composition API 深度解析',
-    summary: '深入了解 Vue 3 的 Composition API，掌握现代 Vue 开发的核心概念和最佳实践。',
-    cover: 'https://picsum.photos/400/200?random=1',
-    status: 'published',
-    category: { name: 'Vue.js' },
-    tags: [{ id: 1, name: 'Vue3' }, { id: 2, name: 'JavaScript' }],
-    createTime: '2024-01-15',
-    viewCount: 1250
-  },
-  {
-    id: 2,
-    title: 'TypeScript 进阶技巧与实战',
-    summary: '分享 TypeScript 的高级特性和在实际项目中的应用技巧。',
-    cover: 'https://picsum.photos/400/200?random=2',
-    status: 'draft',
-    category: { name: 'TypeScript' },
-    tags: [{ id: 3, name: 'TypeScript' }, { id: 4, name: '前端开发' }],
-    createTime: '2024-01-10',
-    viewCount: 0
+// 计算过滤后的文章
+const filteredPosts = computed(() => {
+  let filtered = posts.value
+
+  // 状态过滤
+  if (statusFilter.value) {
+    filtered = filtered.filter(post => {
+      if (statusFilter.value === 'published') {
+        return post.status === 1
+      } else if (statusFilter.value === 'draft') {
+        return post.status === 0
+      }
+      return true
+    })
   }
-]
+
+  // 关键词搜索
+  if (searchKeyword.value) {
+    const keyword = searchKeyword.value.toLowerCase()
+    filtered = filtered.filter(post =>
+      post.title.toLowerCase().includes(keyword) ||
+      (post.summary && post.summary.toLowerCase().includes(keyword))
+    )
+  }
+
+  return filtered
+})
 
 // 获取文章列表
 const fetchPosts = async () => {
   try {
     loading.value = true
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    posts.value = mockPosts
-    total.value = mockPosts.length
+    const response = await request.get('/user/posts/my', {
+      params: {
+        page: currentPage.value,
+        size: pageSize.value,
+        status: statusFilter.value === 'published' ? 1 : statusFilter.value === 'draft' ? 0 : null
+      }
+    })
+
+    if (response.code === 200) {
+      posts.value = response.data.posts || []
+      total.value = response.data.total || 0
+    } else {
+      ElMessage.error(response.message || '获取文章列表失败')
+    }
   } catch (error) {
-    ElMessage.error('获取文章列表失败')
+    console.error('获取文章列表失败:', error)
+    ElMessage.error('获取文章列表失败，请检查网络连接')
   } finally {
     loading.value = false
   }
@@ -221,18 +235,21 @@ const deletePost = async (postId) => {
         type: 'warning',
       }
     )
-    
-    // 模拟删除API调用
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    // 从列表中移除
-    posts.value = posts.value.filter(post => post.id !== postId)
-    total.value = posts.value.length
-    
-    ElMessage.success('文章删除成功')
+
+    // 调用删除API
+    const response = await request.delete(`/posts/del/${postId}`)
+
+    if (response.code === 200) {
+      ElMessage.success('文章删除成功')
+      // 重新获取文章列表
+      fetchPosts()
+    } else {
+      ElMessage.error(response.message || '删除失败')
+    }
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('删除失败')
+      console.error('删除文章失败:', error)
+      ElMessage.error('删除失败，请检查网络连接')
     }
   }
 }

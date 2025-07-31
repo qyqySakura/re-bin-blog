@@ -86,7 +86,9 @@ export const useUserStore = defineStore('user', () => {
   const fetchUserInfo = async () => {
     try {
       const response = await userApi.getUserInfo()
-      userInfo.value = response.data
+      if (response.code === 200) {
+        userInfo.value = response.data.user
+      }
       return response
     } catch (error) {
       // 如果获取用户信息失败，清除本地token

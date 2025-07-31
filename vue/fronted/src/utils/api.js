@@ -17,7 +17,17 @@ export const userApi = {
   // 删除用户
   deleteUser: (id) => request.delete(`/user/del/${id}`),
   // 修改密码
-  changePassword: (data) => request.post('/user/changePassword', data)
+  changePassword: (data) => request.post('/user/changePassword', data),
+  // 用户退出登录
+  logout: () => request.post('/user/auth/logout'),
+  // 获取当前用户信息
+  getUserInfo: () => request.get('/auth/info'),
+  // 更新用户资料
+  updateProfile: (data) => request.put('/user/update', data),
+  // 上传头像
+  uploadAvatar: (formData) => request.post('/user/upload/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
 }
 
 // 管理员相关API
@@ -143,6 +153,10 @@ export const blogApi = {
   getTags: () => request.get('/api/blog/tags'),
   // 获取文章标签
   getPostTags: (postId) => request.get(`/tags/post/${postId}`),
+  // 根据标签获取文章
+  getPostsByTag: (tagId, params = {}) => request.get(`/api/blog/tags/${tagId}/posts`, { params }),
+  // 根据分类获取文章
+  getPostsByCategory: (categoryId, params = {}) => request.get(`/api/blog/categories/${categoryId}/posts`, { params }),
   // 获取热门文章
   getHotPosts: (limit = 5) => request.get('/api/blog/posts/popular', {
     params: { limit }

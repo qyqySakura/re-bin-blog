@@ -24,7 +24,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
                     .notMatch("/user/sendEmailCode") // 发送验证码接口不需要认证
                     .notMatch("/user/verifyEmailCode") // 验证邮箱验证码接口不需要认证
                     .notMatch("/user/add")           // 用户注册接口不需要认证
-                    .notMatch("/auth/info")          // 获取用户信息接口不需要认证
+                    .notMatch("/auth/info")          // 获取用户信息接口不需要认证（内部检查登录状态）
                     .notMatch("/auth/check")         // 检查登录状态接口不需要认证
                     .notMatch("/posts/published")    // 公开的文章列表不需要认证
                     .notMatch("/posts/**")           // 查看文章详情不需要认证

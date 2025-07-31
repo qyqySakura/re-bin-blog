@@ -88,6 +88,8 @@ public class SaTokenUtil {
      * @return token值
      */
     public static String getTokenValue(String loginType) {
+        // Sa-Token的getTokenValue()方法不支持loginType参数
+        // 在多账户体系中，我们直接返回当前会话的token
         return StpUtil.getTokenValue();
     }
     
