@@ -94,7 +94,7 @@ CREATE TABLE `category` (
 
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
-INSERT INTO `category` VALUES (1,'技术分享','分享技术相关的文章',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03'),(2,'生活随笔','记录生活中的点点滴滴',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03'),(3,'学习笔记','学习过程中的心得体会',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03');
+INSERT INTO `category` VALUES (1,'技术分享','分享技术相关的文章',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03'),(2,'生活随笔','记录生活中的点点滴滴',0,1,'2025-07-25 16:58:03','2025-07-31 17:25:33'),(3,'学习笔记','学习过程中的心得体会',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03');
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -289,10 +289,7 @@ CREATE TABLE `post` (
 
 LOCK TABLES `post` WRITE;
 /*!40000 ALTER TABLE `post` DISABLE KEYS */;
-INSERT INTO `post` VALUES
-(1,1,1,'欢迎来到我的博客','这是我的第一篇博客文章，欢迎大家来到我的个人博客！在这里我会分享技术心得、生活感悟和学习笔记。','欢迎来到我的博客，这里会分享各种有趣的内容','https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop',1,'2025-01-01 10:00:00','2025-07-30 18:17:38',0,0,0),
-(2,1,1,'Spring Boot 入门指南','Spring Boot 是一个基于 Spring 框架的快速开发框架，它简化了 Spring 应用的配置和部署过程。本文将介绍如何快速上手 Spring Boot 开发。','Spring Boot 快速入门教程，适合初学者','https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=400&fit=crop',1,'2025-01-02 14:30:00','2025-07-30 17:39:26',0,0,3),
-(3,2,2,'今天的生活感悟','生活就像一杯茶，需要慢慢品味。今天在公园散步时，看到了美丽的夕阳，让我想起了很多美好的回忆。','记录今天的生活感悟和心情','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-03 18:00:00','2025-07-30 17:39:26',0,0,2);
+INSERT INTO `post` VALUES (1,1,1,'欢迎来到我的博客','这是我的第一篇博客文章，欢迎大家来到我的个人博客！在这里我会分享技术心得、生活感悟和学习笔记。','欢迎来到我的博客，这里会分享各种有趣的内容','https://pic3.zhimg.com/v2-dae74e490ddc79d3ef21b09203084102_r.jpg',1,'2025-01-01 10:00:00','2025-07-31 10:54:20',0,0,0),(2,1,1,'Spring Boot 入门指南','Spring Boot 是一个基于 Spring 框架的快速开发框架，它简化了 Spring 应用的配置和部署过程。本文将介绍如何快速上手 Spring Boot 开发。1','Spring Boot 快速入门教程，适合初学者','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-02 14:30:00','2025-07-31 17:07:12',0,0,3),(3,1,2,'今天的生活感悟','<div style=\"text-align: left;\"><br></div><div style=\"text-align: left;\">生活就像一杯茶，需要慢慢品味。今天在公园散步时，看到了美丽的夕阳，让我想起了很多美好的回忆。</div>','记录今天的生活感悟和心情','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-03 18:00:00','2025-07-31 17:25:33',0,0,2);
 /*!40000 ALTER TABLE `post` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -535,7 +532,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'彬彬','9966337','123','1234556667@qq.com','1234567890',NULL,1,'2025-01-01 10:00:00','2025-07-15 18:52:09',NULL,NULL,NULL),(2,'bb','sakura','123123','123123@qq.com','123123','/avatar/1752578177645_1_-___.jpg',1,'2025-01-01 10:00:00','2025-07-15 19:16:17',NULL,NULL,NULL);
+INSERT INTO `user` VALUES (1,'彬彬','123123','123123','2692433610@qq.com','1234567890',NULL,1,'2025-01-01 10:00:00','2025-07-31 16:41:58',NULL,NULL,NULL),(2,'sakura','sakura','123123','123123@qq.com','123123','/avatar/1753929361545_2.jpg',1,'2025-01-01 10:00:00','2025-07-31 10:36:01','111','无','长沙');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -584,4 +581,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-30 18:18:09
+-- Dump completed on 2025-07-31 21:45:57
