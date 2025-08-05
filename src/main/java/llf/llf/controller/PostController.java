@@ -4,7 +4,9 @@ import llf.llf.common.Result;
 import llf.llf.pojo.Post;
 import llf.llf.service.PostService;
 import llf.llf.service.TagService;
+import llf.llf.utils.ImageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -17,9 +19,12 @@ public class PostController {
 
     @Autowired
     private PostService postService;
-    
+
     @Autowired
     private TagService tagService;
+
+    @Autowired
+    private ImageUtils imageUtils;
 
     // 查询所有文章
     @GetMapping
@@ -79,25 +84,47 @@ public class PostController {
     // 新增文章
     @PostMapping("/add")
     public Result<Post> createPost(@RequestBody Map<String, Object> requestData) {
-        Post post = new Post();
-        post.setUserId((Integer) requestData.get("userId"));
-        post.setCategoryId((Integer) requestData.get("categoryId"));
-        post.setTitle((String) requestData.get("title"));
-        post.setContent((String) requestData.get("content"));
-        post.setSummary((String) requestData.get("summary"));
-        post.setCover((String) requestData.get("cover"));
-        post.setStatus((Integer) requestData.get("status"));
+        try {
+            Post post = new Post();
+            post.setUserId((Integer) requestData.get("userId"));
+            post.setCategoryId((Integer) requestData.get("categoryId"));
+            post.setTitle((String) requestData.get("title"));
+            post.setContent((String) requestData.get("content"));
+            post.setSummary((String) requestData.get("summary"));
+            post.setStatus((Integer) requestData.get("status"));
 
-        postService.add(post);
+            // 处理封面图片
+            String coverData = (String) requestData.get("cover");
+            if (StringUtils.hasText(coverData)) {
+                if (coverData.startsWith("data:image/")) {
+                    // 如果是base64图片，进行压缩处理
+                    String processedCoverUrl = imageUtils.processBase64Image(coverData);
+                    post.setCover(processedCoverUrl);
+                } else if (imageUtils.isValidImageUrl(coverData)) {
+                    // 如果是有效的图片URL，直接使用
+                    post.setCover(coverData);
+                } else {
+                    // 无效的图片数据，设为空
+                    post.setCover(null);
+                }
+            } else {
+                post.setCover(null);
+            }
 
-        // 处理标签 - 需要先获取插入后的文章ID
-        @SuppressWarnings("unchecked")
-        List<Integer> tagIds = (List<Integer>) requestData.get("tagIds");
-        if (tagIds != null && !tagIds.isEmpty() && post.getId() != null) {
-            tagService.setPostTags(post.getId(), tagIds);
+            postService.add(post);
+
+            // 处理标签 - 需要先获取插入后的文章ID
+            @SuppressWarnings("unchecked")
+            List<Integer> tagIds = (List<Integer>) requestData.get("tagIds");
+            if (tagIds != null && !tagIds.isEmpty() && post.getId() != null) {
+                tagService.setPostTags(post.getId(), tagIds);
+            }
+
+            return Result.success(post);
+
+        } catch (Exception e) {
+            return Result.error(500, "创建文章失败: " + e.getMessage());
         }
-
-        return Result.success(post);
     }
 
     // 更新文章

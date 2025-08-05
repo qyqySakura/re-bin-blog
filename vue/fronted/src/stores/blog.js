@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { blogApi } from '@/utils/api.js'
+import { API_CONFIG } from '@/config/index.js'
 
 export const useBlogStore = defineStore('blog', () => {
   // 状态
@@ -39,7 +40,20 @@ export const useBlogStore = defineStore('blog', () => {
       })
 
       // 根据后端BlogService的返回结构处理数据
-      posts.value = response.data.posts || []
+      posts.value = (response.data.posts || []).map(post => {
+        // 处理封面图片URL
+        if (post.cover && !post.cover.startsWith('http')) {
+          const originalCover = post.cover
+          post.cover = `${API_CONFIG.BASE_URL}${post.cover}`
+          console.log('BlogStore图片URL处理:', {
+            postId: post.id,
+            title: post.title,
+            original: originalCover,
+            processed: post.cover
+          })
+        }
+        return post
+      })
       pagination.value = {
         page: response.data.page || 1,
         size: response.data.size || 10,

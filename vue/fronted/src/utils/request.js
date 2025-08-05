@@ -1,10 +1,11 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import router from '../router/router.js'
+import { API_CONFIG } from '../config/index.js'
 
 const service = axios.create({
-  baseURL: 'http://localhost:9090',
-  timeout: 10000
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.TIMEOUT
 })
 
 // 请求拦截器

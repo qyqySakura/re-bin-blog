@@ -1,0 +1,50 @@
+# 文件上传配置
+file:
+  upload:
+    # 上传根目录 (相对于项目根目录)
+    path: uploads/
+    # URL访问模式
+    url-pattern: /api/files/**
+    # 最大文件大小 (MB)
+    max-size: 5
+
+# 图片处理配置
+image:
+  # 压缩配置
+  compression:
+    # 最大宽度
+    max-width: 800
+    # 最大高度
+    max-height: 600
+    # 压缩质量 (0.0-1.0)
+    quality: 0.8
+    # 输出格式
+    format: jpg
+
+  # 支持的图片格式
+  allowed-types:
+    - jpg
+    - jpeg
+    - png
+    - gif
+    - webp
+
+# Spring Boot 配置
+spring:
+  servlet:
+    multipart:
+      # 启用文件上传
+      enabled: true
+      # 最大文件大小
+      max-file-size: 5MB
+      # 最大请求大小
+      max-request-size: 10MB
+      # 临时文件目录
+      location: uploads/temp/
+
+  # 静态资源配置
+  web:
+    resources:
+      # 静态资源缓存时间 (秒)
+      cache:
+        period: 3600

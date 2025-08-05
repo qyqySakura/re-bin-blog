@@ -173,6 +173,16 @@ export const blogApi = {
   getFriendLinks: () => request.get('/api/blog/friendlinks')
 }
 
+// 文件上传API
+export const fileApi = {
+  // 上传图片（base64）
+  uploadImage: (imageData) => request.post('/api/files/upload-image', { image: imageData }),
+  // 删除图片
+  deleteImage: (imageUrl) => request.delete('/api/files/delete', { data: { url: imageUrl } }),
+  // 获取文件配置信息
+  getFileConfig: () => request.get('/api/test/file-config')
+}
+
 // 通用API
 export const commonApi = {
   // 上传头像

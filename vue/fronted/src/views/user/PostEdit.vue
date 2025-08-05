@@ -168,7 +168,7 @@
         <div class="form-row">
           <el-form-item label="文章内容" prop="content" class="content-item">
             <div class="editor-container">
-              <RichTextEditor
+              <SimpleRichTextEditor
                 v-model="postForm.content"
                 style="min-height: 400px; width:900px ;"
               />
@@ -224,7 +224,8 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
-import RichTextEditor from '@/components/RichTextEditor.vue'
+import { fileApi, postApi } from '@/utils/api'
+import SimpleRichTextEditor from '@/components/SimpleRichTextEditor.vue'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
@@ -497,7 +498,7 @@ const handleCoverDrop = (event) => {
   }
 }
 
-// 处理文件上传
+// 处理文件上传 - 简化版本，压缩交给后端处理
 const handleCoverFile = (file) => {
   // 验证文件
   if (!file.type.startsWith('image/')) {
@@ -513,7 +514,7 @@ const handleCoverFile = (file) => {
   coverUploading.value = true
   coverUploadProgress.value = 0
 
-  // 使用FileReader读取文件并转换为base64
+  // 直接读取文件为base64，让后端处理压缩
   const reader = new FileReader()
   reader.onload = (e) => {
     // 模拟上传进度
@@ -805,14 +806,14 @@ onUnmounted(() => {
 }
 
 /* 富文本编辑器样式增强 */
-:deep(.rich-text-editor) {
+:deep(.simple-rich-editor) {
   border-radius: var(--el-border-radius-base);
   overflow: hidden;
   box-shadow: var(--el-box-shadow-light);
   transition: box-shadow 0.3s;
 }
 
-:deep(.rich-text-editor:hover) {
+:deep(.simple-rich-editor:hover) {
   box-shadow: var(--el-box-shadow);
 }
 

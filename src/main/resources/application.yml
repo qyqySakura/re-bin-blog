@@ -3,6 +3,10 @@ server:
 
 # 数据库配置
 spring:
+  # 引入其他配置文件
+  profiles:
+    include: image
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root

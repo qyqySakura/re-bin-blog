@@ -55,26 +55,33 @@
       <!-- 评论区 -->
       <div class="comments-section" v-if="post">
         <h3 class="comments-title">评论 ({{ comments.length }})</h3>
-        
+
         <!-- 评论表单 -->
         <div class="comment-form" v-if="isLoggedIn">
-          <el-form @submit.prevent="submitComment">
-            <el-form-item>
+          <div class="comment-form-header" v-if="replyingTo">
+            <span>回复 @{{ replyingTo.user?.name }}：</span>
+            <el-button text size="small" @click="cancelReply">取消</el-button>
+          </div>
+          <div class="comment-input-area">
+            <div class="user-avatar">
+              <img :src="getUserAvatar(currentUser?.avatar)" :alt="currentUser?.name" />
+            </div>
+            <div class="input-wrapper">
               <el-input
                 v-model="newComment.content"
                 type="textarea"
-                :rows="4"
-                placeholder="写下你的评论..."
+                :rows="3"
+                :placeholder="replyingTo ? `回复 @${replyingTo.user?.name}` : '写下你的评论...'"
                 maxlength="500"
                 show-word-limit
               />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="submitComment" :loading="submitting">
-                发表评论
-              </el-button>
-            </el-form-item>
-          </el-form>
+              <div class="form-actions">
+                <el-button type="primary" @click="submitComment" :loading="submitting" size="small">
+                  {{ replyingTo ? '回复' : '发表评论' }}
+                </el-button>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="login-prompt" v-else>
           <p>请 <router-link to="/user/login">登录</router-link> 后发表评论</p>
@@ -82,29 +89,62 @@
 
         <!-- 评论列表 -->
         <div class="comments-list">
-          <div 
-            v-for="comment in comments" 
-            :key="comment.id" 
+          <div
+            v-for="comment in topLevelComments"
+            :key="comment.id"
             class="comment-item"
           >
-            <div class="comment-avatar">
-              <img :src="comment.user?.avatar || '/default-avatar.png'" :alt="comment.user?.name" />
-            </div>
-            <div class="comment-content">
-              <div class="comment-header">
-                <span class="comment-author">{{ comment.user?.name || '匿名' }}</span>
-                <span class="comment-time">{{ formatDate(comment.createTime) }}</span>
+            <!-- 主评论 -->
+            <div class="comment-main">
+              <div class="comment-avatar">
+                <img :src="getUserAvatar(comment.user?.avatar)" :alt="comment.user?.name" />
               </div>
-              <div class="comment-text">{{ comment.content }}</div>
-              <div class="comment-actions">
-                <el-button 
-                  text 
-                  size="small" 
-                  @click="replyToComment(comment.id)"
-                  v-if="isLoggedIn"
-                >
-                  回复
-                </el-button>
+              <div class="comment-content">
+                <div class="comment-header">
+                  <span class="comment-author">{{ comment.user?.name || '匿名' }}</span>
+                  <span class="comment-time">{{ formatDate(comment.createTime) }}</span>
+                </div>
+                <div class="comment-text">{{ comment.content }}</div>
+                <div class="comment-actions">
+                  <el-button
+                    text
+                    size="small"
+                    @click="replyToComment(comment)"
+                    v-if="isLoggedIn"
+                  >
+                    回复
+                  </el-button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 回复列表 -->
+            <div class="replies-list" v-if="comment.replies && comment.replies.length > 0">
+              <div
+                v-for="reply in comment.replies"
+                :key="reply.id"
+                class="reply-item"
+              >
+                <div class="comment-avatar">
+                  <img :src="getUserAvatar(reply.user?.avatar)" :alt="reply.user?.name" />
+                </div>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-author">{{ reply.user?.name || '匿名' }}</span>
+                    <span class="comment-time">{{ formatDate(reply.createTime) }}</span>
+                  </div>
+                  <div class="comment-text">{{ reply.content }}</div>
+                  <div class="comment-actions">
+                    <el-button
+                      text
+                      size="small"
+                      @click="replyToComment(reply)"
+                      v-if="isLoggedIn"
+                    >
+                      回复
+                    </el-button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -121,6 +161,7 @@ import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { User, Calendar, Folder, ArrowLeft } from '@element-plus/icons-vue'
 import { postApi, commentApi } from '@/utils/api'
+import { API_CONFIG } from '@/config/index.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -131,6 +172,7 @@ const loading = ref(false)
 const submitting = ref(false)
 const post = ref(null)
 const comments = ref([])
+const replyingTo = ref(null)
 const newComment = ref({
   content: '',
   postId: null,
@@ -142,21 +184,50 @@ const newComment = ref({
 const isLoggedIn = computed(() => userStore.isLoggedIn)
 const currentUser = computed(() => userStore.userInfo)
 
+// 处理评论层级结构
+const topLevelComments = computed(() => {
+  const topLevel = comments.value.filter(comment => !comment.parentId)
+  return topLevel.map(comment => ({
+    ...comment,
+    replies: comments.value.filter(reply => reply.parentId === comment.id)
+  }))
+})
+
 // 获取文章详情
 const fetchPost = async () => {
   try {
     loading.value = true
     const postId = route.params.id
+    console.log('开始获取文章详情, ID:', postId)
+
     const response = await postApi.getPostById(postId)
+    console.log('API响应:', response)
+
     if (response.code === 200) {
       post.value = response.data
+      console.log('获取到的文章数据:', post.value)
+
+      // 处理封面图片URL
+      if (post.value.cover && !post.value.cover.startsWith('http')) {
+        const originalCover = post.value.cover
+        post.value.cover = `${API_CONFIG.BASE_URL}${post.value.cover}`
+        console.log('图片URL处理:', {
+          original: originalCover,
+          processed: post.value.cover,
+          baseUrl: API_CONFIG.BASE_URL
+        })
+      }
+
       newComment.value.postId = postId
+      console.log('文章详情获取成功')
     } else {
+      console.error('API返回错误:', response)
       ElMessage.error('文章不存在')
       router.push('/')
     }
   } catch (error) {
-    ElMessage.error('获取文章失败')
+    console.error('获取文章详情失败:', error)
+    ElMessage.error(`获取文章失败: ${error.message || error}`)
     router.push('/')
   } finally {
     loading.value = false
@@ -169,7 +240,14 @@ const fetchComments = async () => {
     const postId = route.params.id
     const response = await commentApi.getCommentsByPostId(postId)
     if (response.code === 200) {
-      comments.value = response.data
+      comments.value = response.data.map(comment => ({
+        ...comment,
+        // 处理用户头像URL
+        user: comment.user ? {
+          ...comment.user,
+          avatar: getUserAvatar(comment.user.avatar)
+        } : null
+      }))
     }
   } catch (error) {
     console.error('获取评论失败:', error)
@@ -188,8 +266,10 @@ const submitComment = async () => {
     newComment.value.userId = currentUser.value?.id
     const response = await commentApi.addComment(newComment.value)
     if (response.code === 200) {
-      ElMessage.success('评论发表成功')
+      ElMessage.success(replyingTo.value ? '回复成功' : '评论发表成功')
       newComment.value.content = ''
+      newComment.value.parentId = null
+      replyingTo.value = null
       fetchComments() // 重新获取评论列表
     }
   } catch (error) {
@@ -200,9 +280,34 @@ const submitComment = async () => {
 }
 
 // 回复评论
-const replyToComment = (commentId) => {
-  newComment.value.parentId = commentId
-  // 可以在这里添加更多回复逻辑
+const replyToComment = (comment) => {
+  replyingTo.value = comment
+  newComment.value.parentId = comment.id
+  // 滚动到评论表单
+  document.querySelector('.comment-form')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+// 取消回复
+const cancelReply = () => {
+  replyingTo.value = null
+  newComment.value.parentId = null
+  newComment.value.content = ''
+}
+
+// 获取用户头像URL
+const getUserAvatar = (avatar) => {
+  // 如果没有头像，使用后端提供的默认头像
+  if (!avatar) {
+    return `${API_CONFIG.BASE_URL}/static/default-avatar.png`
+  }
+
+  // 如果已经是完整URL，直接返回
+  if (avatar.startsWith('http')) return avatar
+
+  // 如果是API路径，拼接基础URL
+  if (avatar.startsWith('/api/')) return `${API_CONFIG.BASE_URL}${avatar}`
+
+  return avatar
 }
 
 // 格式化日期
@@ -324,6 +429,43 @@ onMounted(() => {
   border-radius: 8px;
 }
 
+.comment-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #e3f2fd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #1976d2;
+}
+
+.comment-input-area {
+  display: flex;
+  gap: 12px;
+}
+
+.user-avatar {
+  flex-shrink: 0;
+}
+
+.user-avatar img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.input-wrapper {
+  flex: 1;
+}
+
+.form-actions {
+  margin-top: 10px;
+  text-align: right;
+}
+
 .login-prompt {
   text-align: center;
   padding: 20px;
@@ -339,17 +481,22 @@ onMounted(() => {
 }
 
 .comment-item {
-  display: flex;
-  gap: 15px;
-  padding: 15px;
   border: 1px solid #eee;
   border-radius: 8px;
+  overflow: hidden;
+}
+
+.comment-main {
+  display: flex;
+  gap: 12px;
+  padding: 15px;
 }
 
 .comment-avatar img {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
 .comment-content {
@@ -359,27 +506,50 @@ onMounted(() => {
 .comment-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
 }
 
 .comment-author {
-  font-weight: bold;
+  font-weight: 600;
   color: #333;
 }
 
 .comment-time {
   color: #999;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .comment-text {
   margin-bottom: 10px;
   line-height: 1.6;
+  color: #555;
 }
 
 .comment-actions {
   display: flex;
   gap: 10px;
+}
+
+.replies-list {
+  background: #f8f9fa;
+  border-top: 1px solid #eee;
+}
+
+.reply-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.reply-item:last-child {
+  border-bottom: none;
+}
+
+.reply-item .comment-avatar img {
+  width: 32px;
+  height: 32px;
 }
 
 @media (max-width: 768px) {
