@@ -8,6 +8,11 @@ public interface PostService {
     List<Post> selectAll();
     
     Post selectById(Integer id);
+
+    /**
+     * 根据ID获取文章（包含点赞状态，并增加阅读量）
+     */
+    Post selectByIdWithLikeStatusAndView(Integer id, Integer currentUserId);
     
     List<Post> selectByUserId(Integer userId);
     
@@ -44,4 +49,9 @@ public interface PostService {
 
     // 统计分类下的文章数量
     int countPostsByCategoryId(Integer categoryId);
+
+    /**
+     * 分页查询已发布的文章（包含点赞状态）
+     */
+    List<Post> selectPublishedPostsWithLikeStatus(Integer page, Integer size, Integer currentUserId);
 }

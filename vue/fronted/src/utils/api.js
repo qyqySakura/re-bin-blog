@@ -69,7 +69,9 @@ export const postApi = {
   // 更新文章
   updatePost: (data) => request.put('/posts/update', data),
   // 删除文章
-  deletePost: (id) => request.delete(`/posts/del/${id}`)
+  deletePost: (id) => request.delete(`/posts/del/${id}`),
+  // 点赞/取消点赞文章
+  toggleLike: (postId) => request.post(`/posts/like/${postId}`)
 }
 
 // 分类相关API
@@ -123,7 +125,9 @@ export const commentApi = {
   // 更新评论
   updateComment: (data) => request.put('/comments/update', data),
   // 删除评论
-  deleteComment: (id) => request.delete(`/comments/del/${id}`)
+  deleteComment: (id) => request.delete(`/comments/del/${id}`),
+  // 点赞/取消点赞评论
+  toggleLike: (commentId) => request.post(`/comments/like/${commentId}`)
 }
 
 // 博客前台API

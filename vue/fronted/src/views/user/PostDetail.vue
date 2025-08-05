@@ -43,6 +43,22 @@
 
         <!-- 文章底部 -->
         <footer class="post-footer">
+          <div class="post-stats">
+            <div class="stat-item">
+              <span class="stat-icon">👁️</span>
+              <span class="stat-text">{{ post.viewCount || 0 }} 阅读</span>
+            </div>
+            <div class="stat-item">
+              <button
+                class="like-btn"
+                :class="{ 'liked': post.isLiked }"
+                @click="togglePostLike"
+              >
+                <span class="like-icon">{{ post.isLiked ? '❤️' : '🤍' }}</span>
+                <span class="like-text">{{ post.likeCount || 0 }} 点赞</span>
+              </button>
+            </div>
+          </div>
           <div class="post-actions">
             <el-button @click="goBack">
               <el-icon><ArrowLeft /></el-icon>
@@ -68,6 +84,7 @@
             </div>
             <div class="input-wrapper">
               <el-input
+                ref="commentInput"
                 v-model="newComment.content"
                 type="textarea"
                 :rows="3"
@@ -76,6 +93,28 @@
                 show-word-limit
               />
               <div class="form-actions">
+                <div class="emoji-section">
+                  <el-button
+                    text
+                    size="small"
+                    @click="toggleEmojiPicker"
+                    class="emoji-btn"
+                  >
+                    😊 表情
+                  </el-button>
+                  <div v-if="showEmojiPicker" class="emoji-picker">
+                    <div class="emoji-grid">
+                      <span
+                        v-for="emoji in commonEmojis"
+                        :key="emoji"
+                        class="emoji-item"
+                        @click="insertEmoji(emoji)"
+                      >
+                        {{ emoji }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 <el-button type="primary" @click="submitComment" :loading="submitting" size="small">
                   {{ replyingTo ? '回复' : '发表评论' }}
                 </el-button>
@@ -109,6 +148,15 @@
                   <el-button
                     text
                     size="small"
+                    @click="toggleLike(comment)"
+                    :class="{ 'liked': comment.isLiked }"
+                    class="like-btn"
+                  >
+                    {{ comment.isLiked ? '❤️' : '🤍' }} {{ comment.likeCount || 0 }}
+                  </el-button>
+                  <el-button
+                    text
+                    size="small"
                     @click="replyToComment(comment)"
                     v-if="isLoggedIn"
                   >
@@ -131,10 +179,22 @@
                 <div class="comment-content">
                   <div class="comment-header">
                     <span class="comment-author">{{ reply.user?.name || '匿名' }}</span>
+                    <span class="reply-target" v-if="getReplyTarget(reply, comment)">
+                      回复 @{{ getReplyTarget(reply, comment) }}
+                    </span>
                     <span class="comment-time">{{ formatDate(reply.createTime) }}</span>
                   </div>
                   <div class="comment-text">{{ reply.content }}</div>
                   <div class="comment-actions">
+                    <el-button
+                      text
+                      size="small"
+                      @click="toggleLike(reply)"
+                      :class="{ 'liked': reply.isLiked }"
+                      class="like-btn"
+                    >
+                      {{ reply.isLiked ? '❤️' : '🤍' }} {{ reply.likeCount || 0 }}
+                    </el-button>
                     <el-button
                       text
                       size="small"
@@ -155,11 +215,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
-import { User, Calendar, Folder, ArrowLeft } from '@element-plus/icons-vue'
+
 import { postApi, commentApi } from '@/utils/api'
 import { API_CONFIG } from '@/config/index.js'
 
@@ -173,12 +233,29 @@ const submitting = ref(false)
 const post = ref(null)
 const comments = ref([])
 const replyingTo = ref(null)
+const showEmojiPicker = ref(false)
+const commentInput = ref(null)
 const newComment = ref({
   content: '',
   postId: null,
   userId: null,
-  parentId: null
+  parentId: null,
+  replyToUserId: null
 })
+
+// 常用表情
+const commonEmojis = [
+  '😊', '😂', '🤣', '😍', '🥰', '😘', '😗', '😙', '😚', '🙂',
+  '🤗', '🤔', '😐', '😑', '😶', '🙄', '😏', '😣', '😥', '😮',
+  '🤐', '😯', '😪', '😫', '🥱', '😴', '😌', '😛', '😜', '😝',
+  '🤤', '😒', '😓', '😔', '😕', '🙃', '🤑', '😲', '☹️', '🙁',
+  '😖', '😞', '😟', '😤', '😢', '😭', '😦', '😧', '😨', '😩',
+  '🤯', '😬', '😰', '😱', '🥵', '🥶', '😳', '🤪', '😵', '🥴',
+  '👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉',
+  '👆', '🖕', '👇', '☝️', '👋', '🤚', '🖐️', '✋', '🖖', '👏',
+  '🙌', '🤲', '🤝', '🙏', '✍️', '💪', '🦾', '🦿', '🦵', '🦶',
+  '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔'
+]
 
 // 计算属性
 const isLoggedIn = computed(() => userStore.isLoggedIn)
@@ -269,6 +346,7 @@ const submitComment = async () => {
       ElMessage.success(replyingTo.value ? '回复成功' : '评论发表成功')
       newComment.value.content = ''
       newComment.value.parentId = null
+      newComment.value.replyToUserId = null
       replyingTo.value = null
       fetchComments() // 重新获取评论列表
     }
@@ -282,7 +360,13 @@ const submitComment = async () => {
 // 回复评论
 const replyToComment = (comment) => {
   replyingTo.value = comment
-  newComment.value.parentId = comment.id
+  // 如果是回复主评论，parentId设为主评论ID
+  // 如果是回复回复，parentId设为主评论ID（保持扁平结构）
+  const mainCommentId = comment.parentId || comment.id
+  newComment.value.parentId = mainCommentId
+  // 记录被回复的用户ID，用于显示回复目标
+  newComment.value.replyToUserId = comment.user?.id
+
   // 滚动到评论表单
   document.querySelector('.comment-form')?.scrollIntoView({ behavior: 'smooth' })
 }
@@ -291,7 +375,37 @@ const replyToComment = (comment) => {
 const cancelReply = () => {
   replyingTo.value = null
   newComment.value.parentId = null
+  newComment.value.replyToUserId = null
   newComment.value.content = ''
+  showEmojiPicker.value = false
+}
+
+// 切换表情选择器
+const toggleEmojiPicker = () => {
+  showEmojiPicker.value = !showEmojiPicker.value
+}
+
+// 插入表情
+const insertEmoji = (emoji) => {
+  const textarea = commentInput.value?.textarea || commentInput.value?.input
+  if (textarea) {
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const content = newComment.value.content
+
+    newComment.value.content = content.substring(0, start) + emoji + content.substring(end)
+
+    // 设置光标位置
+    nextTick(() => {
+      textarea.focus()
+      textarea.setSelectionRange(start + emoji.length, start + emoji.length)
+    })
+  } else {
+    // 如果无法获取光标位置，直接追加到末尾
+    newComment.value.content += emoji
+  }
+
+  showEmojiPicker.value = false
 }
 
 // 获取用户头像URL
@@ -304,10 +418,51 @@ const getUserAvatar = (avatar) => {
   // 如果已经是完整URL，直接返回
   if (avatar.startsWith('http')) return avatar
 
+  // 如果是头像路径，拼接基础URL
+  if (avatar.startsWith('/avatar/')) return `${API_CONFIG.BASE_URL}${avatar}`
+
   // 如果是API路径，拼接基础URL
   if (avatar.startsWith('/api/')) return `${API_CONFIG.BASE_URL}${avatar}`
 
   return avatar
+}
+
+// 切换点赞状态
+const toggleLike = async (comment) => {
+  if (!isLoggedIn.value) {
+    ElMessage.warning('请先登录')
+    return
+  }
+
+  try {
+    const response = await commentApi.toggleLike(comment.id)
+    if (response.code === 200) {
+      ElMessage.success(response.message)
+      // 重新获取评论数据以确保数据同步
+      await fetchComments()
+    } else {
+      ElMessage.error(response.message || '操作失败')
+    }
+  } catch (error) {
+    console.error('点赞操作失败:', error)
+    ElMessage.error('操作失败')
+  }
+}
+
+// 获取回复目标用户名
+const getReplyTarget = (reply, mainComment) => {
+  // 如果有被回复的用户信息，直接返回
+  if (reply.replyToUser?.name) {
+    return reply.replyToUser.name
+  }
+
+  // 如果回复的是主评论，返回主评论作者
+  if (reply.parentId === mainComment.id) {
+    return mainComment.user?.name
+  }
+
+  // 默认返回主评论作者
+  return mainComment.user?.name
 }
 
 // 格式化日期
@@ -322,14 +477,48 @@ const goBack = () => {
   router.go(-1)
 }
 
+// 切换文章点赞状态
+const togglePostLike = async () => {
+  if (!isLoggedIn.value) {
+    ElMessage.warning('请先登录')
+    return
+  }
+
+  try {
+    const response = await postApi.toggleLike(post.value.id)
+    if (response.code === 200) {
+      ElMessage.success(response.message)
+      // 重新获取文章数据以确保数据同步
+      await fetchPost()
+    } else {
+      ElMessage.error(response.message || '操作失败')
+    }
+  } catch (error) {
+    console.error('点赞操作失败:', error)
+    ElMessage.error('操作失败')
+  }
+}
+
+// 点击外部关闭表情选择器
+const handleClickOutside = (event) => {
+  const emojiSection = event.target.closest('.emoji-section')
+  if (!emojiSection && showEmojiPicker.value) {
+    showEmojiPicker.value = false
+  }
+}
+
 // 初始化
 onMounted(() => {
   fetchPost()
   fetchComments()
+
+  // 点击外部关闭表情选择器
+  document.addEventListener('click', handleClickOutside)
 })
 </script>
 
 <style scoped>
+/* 页面布局 */
 .post-detail {
   min-height: 100vh;
   background: #f5f5f5;
@@ -342,6 +531,7 @@ onMounted(() => {
   padding: 0 20px;
 }
 
+/* 文章内容 */
 .post-content {
   background: white;
   border-radius: 8px;
@@ -409,6 +599,60 @@ onMounted(() => {
   border-top: 1px solid #eee;
 }
 
+.post-stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.stat-icon {
+  font-size: 1.1rem;
+}
+
+.like-btn {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+}
+
+.like-btn:hover {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+  background: #fff5f5;
+}
+
+.like-btn.liked {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+  background: #fff5f5;
+}
+
+.like-icon {
+  font-size: 1.1rem;
+}
+
+.post-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
 .comments-section {
   background: white;
   border-radius: 8px;
@@ -463,7 +707,53 @@ onMounted(() => {
 
 .form-actions {
   margin-top: 10px;
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.emoji-section {
+  position: relative;
+}
+
+.emoji-btn {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.emoji-picker {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  z-index: 1000;
+  margin-bottom: 5px;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 5px;
+  max-width: 300px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.emoji-item {
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.emoji-item:hover {
+  background-color: #f0f0f0;
 }
 
 .login-prompt {
@@ -505,9 +795,10 @@ onMounted(() => {
 
 .comment-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .comment-author {
@@ -515,9 +806,18 @@ onMounted(() => {
   color: #333;
 }
 
+.reply-target {
+  color: #1976d2;
+  font-size: 0.85rem;
+  background: #e3f2fd;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
 .comment-time {
   color: #999;
   font-size: 0.85rem;
+  margin-left: auto;
 }
 
 .comment-text {
@@ -529,6 +829,20 @@ onMounted(() => {
 .comment-actions {
   display: flex;
   gap: 10px;
+  align-items: center;
+}
+
+.like-btn {
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.like-btn:hover {
+  color: #ff6b6b;
+}
+
+.like-btn.liked {
+  color: #ff6b6b;
 }
 
 .replies-list {

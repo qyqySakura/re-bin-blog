@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="llf.llf.mapper.CommentLikeMapper">
+
+    <resultMap id="BaseResultMap" type="llf.llf.pojo.CommentLike">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="commentId" column="comment_id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 添加点赞 -->
+    <insert id="addLike">
+        INSERT INTO comment_like (comment_id, user_id, create_time)
+        VALUES (#{commentId}, #{userId}, NOW())
+    </insert>
+
+    <!-- 取消点赞 -->
+    <delete id="removeLike">
+        DELETE FROM comment_like 
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </delete>
+
+    <!-- 检查用户是否已点赞 -->
+    <select id="checkUserLike" resultType="int">
+        SELECT COUNT(1) 
+        FROM comment_like 
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </select>
+
+    <!-- 获取用户点赞的评论ID列表 -->
+    <select id="getUserLikedCommentIds" resultType="int">
+        SELECT comment_id 
+        FROM comment_like 
+        WHERE user_id = #{userId}
+        <if test="commentIds != null and commentIds.size() > 0">
+            AND comment_id IN
+            <foreach collection="commentIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+    <!-- 获取评论的点赞数量 -->
+    <select id="getLikeCount" resultType="int">
+        SELECT COUNT(1) 
+        FROM comment_like 
+        WHERE comment_id = #{commentId}
+    </select>
+
+</mapper>

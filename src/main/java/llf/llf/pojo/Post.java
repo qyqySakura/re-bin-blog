@@ -16,6 +16,8 @@ public class Post {
     private String summary;        // 摘要
     private String cover;          // 封面图
     private Integer status;        // 状态 1-发布 0-草稿
+    private Integer viewCount;     // 阅读量
+    private Integer likeCount;     // 点赞数
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
@@ -23,4 +25,7 @@ public class Post {
     private User author;           // 作者信息
     private Category category;     // 分类信息
     private List<Tag> tags;        // 标签列表
+
+    // 扩展字段（不存储到数据库）
+    private Boolean isLiked;       // 当前用户是否已点赞
 }

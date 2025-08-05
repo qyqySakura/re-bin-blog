@@ -111,6 +111,7 @@ CREATE TABLE `comment` (
   `user_id` int NOT NULL COMMENT '评论用户ID',
   `content` text NOT NULL COMMENT '评论内容',
   `parent_id` int DEFAULT NULL COMMENT '父评论ID',
+  `reply_to_user_id` int DEFAULT NULL COMMENT '被回复的用户ID',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `status` tinyint DEFAULT '1' COMMENT '状态 1-正常 0-隐藏',
   `like_count` int DEFAULT '0' COMMENT '点赞次数',
@@ -119,8 +120,10 @@ CREATE TABLE `comment` (
   KEY `user_id` (`user_id`),
   KEY `idx_post_create_time` (`post_id`,`create_time` DESC),
   KEY `idx_parent_id` (`parent_id`),
+  KEY `idx_reply_to_user_id` (`reply_to_user_id`),
   CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`),
-  CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+  CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
+  CONSTRAINT `comment_ibfk_3` FOREIGN KEY (`reply_to_user_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

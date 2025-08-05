@@ -28,4 +28,7 @@ public interface CommentMapper extends BaseMapper<Comment> {
     
     // 删除文章的所有评论
     int deleteByPostId(@Param("postId") Integer postId);
+
+    // 更新评论点赞数量
+    int updateLikeCount(@Param("commentId") Integer commentId, @Param("likeCount") Integer likeCount);
 }

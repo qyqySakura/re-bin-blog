@@ -1,8 +1,10 @@
 package llf.llf.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import llf.llf.common.Result;
 import llf.llf.pojo.Post;
 import llf.llf.service.PostService;
+import llf.llf.service.PostLikeService;
 import llf.llf.service.TagService;
 import llf.llf.utils.ImageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +23,34 @@ public class PostController {
     private PostService postService;
 
     @Autowired
+    private PostLikeService postLikeService;
+
+    @Autowired
     private TagService tagService;
 
     @Autowired
     private ImageUtils imageUtils;
+
+    /**
+     * 获取当前登录用户的ID（处理Sa-Token的字符串格式）
+     */
+    private Integer getCurrentUserId() {
+        if (!StpUtil.isLogin()) {
+            return null;
+        }
+
+        try {
+            String loginIdStr = StpUtil.getLoginIdAsString();
+            // 处理"user_1"格式的ID，提取数字部分
+            if (loginIdStr.startsWith("user_")) {
+                return Integer.parseInt(loginIdStr.substring(5));
+            } else {
+                return Integer.parseInt(loginIdStr);
+            }
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     // 查询所有文章
     @GetMapping
@@ -39,10 +65,11 @@ public class PostController {
         return Result.success(postService.searchPosts(keyword));
     }
 
-    // 根据ID查询文章
+    // 根据ID查询文章（包含点赞状态，并增加阅读量）
     @GetMapping("/{id}")
     public Result<Post> getPostById(@PathVariable Integer id) {
-        Post post = postService.selectById(id);
+        Integer currentUserId = getCurrentUserId();
+        Post post = postService.selectByIdWithLikeStatusAndView(id, currentUserId);
         if (post != null) {
             // 获取文章的标签
             post.setTags(tagService.selectByPostId(id));
@@ -156,5 +183,21 @@ public class PostController {
         tagService.setPostTags(id, null);
         // 删除文章
         return Result.success(postService.deleteById(id));
+    }
+
+    // 点赞/取消点赞文章
+    @PostMapping("/like/{postId}")
+    public Result<String> toggleLike(@PathVariable Integer postId) {
+        // 检查用户是否登录
+        if (!StpUtil.isLogin()) {
+            return Result.unauthorized("请先登录");
+        }
+
+        Integer userId = getCurrentUserId();
+        if (userId == null) {
+            return Result.badRequest("用户ID格式错误");
+        }
+
+        return postLikeService.toggleLike(postId, userId);
     }
 }

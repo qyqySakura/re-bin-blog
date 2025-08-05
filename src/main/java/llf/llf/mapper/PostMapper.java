@@ -62,4 +62,10 @@ public interface PostMapper extends BaseMapper<Post> {
 
     // 统计分类下的文章数量
     int countPostsByCategoryId(@Param("categoryId") Integer categoryId);
+
+    // 增加阅读量
+    int incrementViewCount(@Param("postId") Integer postId);
+
+    // 更新文章点赞数量
+    int updateLikeCount(@Param("postId") Integer postId, @Param("likeCount") Integer likeCount);
 }

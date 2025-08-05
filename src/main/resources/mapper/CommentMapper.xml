@@ -8,7 +8,10 @@
         <result property="userId" column="user_id" jdbcType="INTEGER"/>
         <result property="content" column="content" jdbcType="LONGVARCHAR"/>
         <result property="parentId" column="parent_id" jdbcType="INTEGER"/>
+        <result property="replyToUserId" column="reply_to_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="likeCount" column="like_count" jdbcType="INTEGER"/>
     </resultMap>
 
     <resultMap id="CommentWithUserMap" type="llf.llf.pojo.Comment" extends="BaseResultMap">
@@ -18,15 +21,21 @@
             <result property="username" column="user_username"/>
             <result property="avatar" column="user_avatar"/>
         </association>
+        <association property="replyToUser" javaType="llf.llf.pojo.User">
+            <id property="id" column="reply_to_user_id"/>
+            <result property="name" column="reply_to_user_name"/>
+            <result property="username" column="reply_to_user_username"/>
+            <result property="avatar" column="reply_to_user_avatar"/>
+        </association>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, post_id, user_id, content, parent_id, create_time
+        id, post_id, user_id, content, parent_id, reply_to_user_id, create_time, status, like_count
     </sql>
 
     <insert id="add" parameterType="llf.llf.pojo.Comment" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO comment (post_id, user_id, content, parent_id, create_time)
-        VALUES (#{postId}, #{userId}, #{content}, #{parentId}, NOW())
+        INSERT INTO comment (post_id, user_id, content, parent_id, reply_to_user_id, create_time)
+        VALUES (#{postId}, #{userId}, #{content}, #{parentId}, #{replyToUserId}, NOW())
     </insert>
 
     <update id="update" parameterType="llf.llf.pojo.Comment">
@@ -44,26 +53,32 @@
     </delete>
 
     <select id="selectAll" resultMap="CommentWithUserMap">
-        SELECT c.*, 
-               u.name as user_name, u.username as user_username, u.avatar as user_avatar
+        SELECT c.*,
+               u.name as user_name, u.username as user_username, u.avatar as user_avatar,
+               ru.name as reply_to_user_name, ru.username as reply_to_user_username, ru.avatar as reply_to_user_avatar
         FROM comment c
         LEFT JOIN user u ON c.user_id = u.id
+        LEFT JOIN user ru ON c.reply_to_user_id = ru.id
         ORDER BY c.create_time DESC
     </select>
 
     <select id="selectById" resultMap="CommentWithUserMap">
         SELECT c.*,
-               u.name as user_name, u.username as user_username, u.avatar as user_avatar
+               u.name as user_name, u.username as user_username, u.avatar as user_avatar,
+               ru.name as reply_to_user_name, ru.username as reply_to_user_username, ru.avatar as reply_to_user_avatar
         FROM comment c
         LEFT JOIN user u ON c.user_id = u.id
+        LEFT JOIN user ru ON c.reply_to_user_id = ru.id
         WHERE c.id = #{id}
     </select>
 
     <select id="selectByPostId" resultMap="CommentWithUserMap">
         SELECT c.*,
-               u.name as user_name, u.username as user_username, u.avatar as user_avatar
+               u.name as user_name, u.username as user_username, u.avatar as user_avatar,
+               ru.name as reply_to_user_name, ru.username as reply_to_user_username, ru.avatar as reply_to_user_avatar
         FROM comment c
         LEFT JOIN user u ON c.user_id = u.id
+        LEFT JOIN user ru ON c.reply_to_user_id = ru.id
         WHERE c.post_id = #{postId}
         ORDER BY c.create_time ASC
     </select>
@@ -75,12 +90,19 @@
     </select>
 
     <select id="selectByParentId" resultMap="CommentWithUserMap">
-        SELECT c.*, 
-               u.name as user_name, u.username as user_username, u.avatar as user_avatar
+        SELECT c.*,
+               u.name as user_name, u.username as user_username, u.avatar as user_avatar,
+               ru.name as reply_to_user_name, ru.username as reply_to_user_username, ru.avatar as reply_to_user_avatar
         FROM comment c
         LEFT JOIN user u ON c.user_id = u.id
+        LEFT JOIN user ru ON c.reply_to_user_id = ru.id
         WHERE c.parent_id = #{parentId}
         ORDER BY c.create_time ASC
     </select>
+
+    <!-- 更新评论点赞数量 -->
+    <update id="updateLikeCount">
+        UPDATE comment SET like_count = #{likeCount} WHERE id = #{commentId}
+    </update>
 
 </mapper>

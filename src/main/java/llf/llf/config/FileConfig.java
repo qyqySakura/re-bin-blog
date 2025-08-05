@@ -24,22 +24,31 @@ public class FileConfig implements WebMvcConfigurer {
     
     /**
      * 配置静态资源映射
-     * 将 /api/files/** 映射到文件上传目录
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 获取绝对路径 - 映射到covers子目录
-        String coversPath = new File(uploadPath + "covers/").getAbsolutePath() + File.separator;
+        // 获取项目根目录
+        String projectRoot = System.getProperty("user.dir");
 
-        // 映射文件访问路径
+        // 文章封面访问 - /api/files/** -> uploads/covers/
+        String coversPath = new File(uploadPath + "covers/").getAbsolutePath() + File.separator;
         registry.addResourceHandler(urlPattern)
                 .addResourceLocations("file:" + coversPath)
-                .setCachePeriod(3600); // 缓存1小时
+                .setCachePeriod(3600);
 
-        System.out.println("静态资源映射配置:");
-        System.out.println("URL Pattern: " + urlPattern);
-        System.out.println("File Location: file:" + coversPath);
-        System.out.println("映射说明: /api/files/xxx.jpg -> " + coversPath + "xxx.jpg");
+        // 用户头像访问 - /avatar/** -> avatar/
+        registry.addResourceHandler("/avatar/**")
+                .addResourceLocations("file:" + projectRoot + File.separator + "avatar" + File.separator);
+
+        // 静态资源访问 - /static/** -> vue/fronted/src/assets/
+        registry.addResourceHandler("/static/**")
+                .addResourceLocations("classpath:/static/")
+                .addResourceLocations("file:" + projectRoot + File.separator + "vue" + File.separator + "fronted" + File.separator + "src" + File.separator + "assets" + File.separator);
+
+        System.out.println("静态资源映射配置完成:");
+        System.out.println("文章封面: " + urlPattern + " -> " + coversPath);
+        System.out.println("用户头像: /avatar/** -> " + projectRoot + "/avatar/");
+        System.out.println("静态资源: /static/** -> " + projectRoot + "/vue/fronted/src/assets/");
     }
     
     /**
