@@ -47,9 +47,9 @@
           >
             <div class="post-cover" v-if="post.cover">
               <img
-                :src="post.cover"
+                :src="processImageUrl(post.cover, 'cover')"
                 :alt="post.title"
-                @error="handleImageError"
+                @error="(e) => handleImageError(e, 'cover')"
                 loading="lazy"
               />
               <div class="cover-overlay">
@@ -110,10 +110,11 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { 
-  Folder, ArrowLeft, View, User, Calendar 
+import {
+  Folder, ArrowLeft, View, User, Calendar
 } from '@element-plus/icons-vue'
 import { blogApi } from '@/utils/api'
+import { processImageUrl, handleImageError } from '@/utils/imageUtils'
 
 const router = useRouter()
 const route = useRoute()
@@ -189,12 +190,7 @@ const goBack = () => {
   router.push('/categories')
 }
 
-// 处理图片加载错误
-const handleImageError = (event) => {
-  console.error('图片加载失败:', event.target.src)
-  // 设置默认图片
-  event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop'
-}
+
 
 // 分页处理
 const handleSizeChange = (newSize) => {

@@ -12,15 +12,13 @@
     <footer class="blog-footer">
       <div class="footer-content">
         <div class="footer-info">
-          <p>© 2024 RE-BIN 个人博客 | 分享技术心得，记录生活点滴</p>
-          <p>备案号：xxxxxx |
-            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">工信部备案</a>
-          </p>
+          <p>© 2025 RE-BIN 个人博客 | 分享技术心得，记录生活点滴</p>
+          <p>邮箱：f2692433610@outlook.com</p>
         </div>
         <div class="footer-links">
           <a href="/about">关于我</a>
-          <a href="mailto:contact@rebin.com">联系我</a>
-          <a href="/rss.xml">RSS订阅</a>
+          <a href="https://gitee.com/sakurafengbinbin">联系我</a>
+          <a href="https://gitee.com/sakurafengbinbin">github主页</a>
         </div>
       </div>
     </footer>

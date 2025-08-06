@@ -53,6 +53,13 @@ mybatis:
     mapUnderscoreToCamelCase: true
   mapper-locations: classpath:mapper/*.xml
 
+# 日志配置
+logging:
+  level:
+    org.springframework.mail: DEBUG
+    javax.mail: DEBUG
+    llf.llf.service.impl.UserServiceImpl: DEBUG
+
 # 其它配置...
 
 

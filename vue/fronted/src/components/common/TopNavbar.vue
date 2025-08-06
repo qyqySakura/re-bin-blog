@@ -102,6 +102,9 @@
           @change="toggleTheme"
         />
 
+        <!-- 消息通知 (仅登录用户显示) -->
+        <NotificationDropdown v-if="isLoggedIn" />
+
         <div class="auth-section" v-if="!isLoggedIn">
           <el-button type="primary" @click="$router.push('/user/login')">登录</el-button>
           <el-button @click="$router.push('/user/register')">注册</el-button>
@@ -120,6 +123,9 @@
               <el-dropdown-menu>
                 <el-dropdown-item command="profile">
                   <el-icon><User /></el-icon>个人资料
+                </el-dropdown-item>
+                <el-dropdown-item command="notifications">
+                  <el-icon><Bell /></el-icon>消息通知
                 </el-dropdown-item>
                 <!-- 只有网站作者才显示文章管理 -->
                 <el-dropdown-item v-if="isBlogAuthor" command="posts">
@@ -251,6 +257,7 @@
             </div>
             <div class="mobile-user-actions">
               <el-button @click="handleMobileUserAction('profile')">个人资料</el-button>
+              <el-button @click="handleMobileUserAction('notifications')">消息通知</el-button>
               <!-- 只有网站作者才显示文章管理 -->
               <el-button v-if="isBlogAuthor" @click="handleMobileUserAction('posts')">我的文章</el-button>
               <el-button type="danger" @click="handleMobileUserAction('logout')">退出登录</el-button>
@@ -268,6 +275,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { getAvatarUrl } from '@/utils/avatar'
+import NotificationDropdown from '@/components/NotificationDropdown.vue'
 import {
   House, Calendar, Folder, CollectionTag, User, Search,
   Moon, Sunny, ArrowDown, Document, SwitchButton, Menu, Close, Link, Clock
@@ -379,6 +387,9 @@ const toggleTheme = () => {
 
 const handleUserCommand = async (command) => {
   switch (command) {
+    case 'notifications':
+      router.push('/notifications')
+      break
     case 'profile':
       router.push('/user/profile')
       break
@@ -430,6 +441,9 @@ const handleMobileAuth = (type) => {
 
 const handleMobileUserAction = async (action) => {
   switch (action) {
+    case 'notifications':
+      router.push('/notifications')
+      break
     case 'profile':
       router.push('/user/profile')
       break
@@ -465,7 +479,7 @@ const handleMobileUserAction = async (action) => {
 }
 
 .nav-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
   display: flex;

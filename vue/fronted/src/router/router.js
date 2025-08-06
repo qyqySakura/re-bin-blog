@@ -15,6 +15,7 @@ import About from '../views/user/About.vue'
 import FriendLinks from '../views/user/FriendLinks.vue'
 import UserProfile from '../views/user/Profile.vue'
 import UserPosts from '../views/user/UserPosts.vue'
+import UserNotifications from '../views/user/Notifications.vue'
 import Search from '../views/user/Search.vue'
 import UserList from '../views/user/index.vue'
 import AdminList from '../views/admin/index.vue'
@@ -98,6 +99,11 @@ const routes = [
     path: '/user/posts',
     component: UserPosts,
     meta: { requiresAuth: true, requiresBlogAuthor: true, title: '我的文章' }
+  },
+  {
+    path: '/notifications',
+    component: UserNotifications,
+    meta: { requiresAuth: true, title: '消息通知' }
   },
   {
     path: '/user/edit',

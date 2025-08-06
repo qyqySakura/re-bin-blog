@@ -5,6 +5,7 @@ import llf.llf.pojo.*;
 import llf.llf.service.BlogService;
 import llf.llf.service.PostService;
 import llf.llf.service.FriendLinkService;
+import llf.llf.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,9 @@ public class BlogServiceImpl implements BlogService {
 
     @Autowired
     private FriendLinkService friendLinkService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public Map<String, Object> getHomePagePosts(int page, int size) {
@@ -204,6 +208,54 @@ public class BlogServiceImpl implements BlogService {
     public int addComment(Comment comment) {
         comment.setCreateTime(LocalDateTime.now());
         int result = commentMapper.add(comment);
+
+        // 发送评论通知
+        if (result > 0) {
+            try {
+                Post post = postMapper.selectById(comment.getPostId());
+                if (post != null && post.getUserId() != null) {
+                    if (comment.getParentId() != null && comment.getParentId() > 0) {
+                        // 这是回复评论，发送回复通知
+                        Integer recipientId = null;
+
+                        // 优先使用 reply_to_user_id（直接被回复的用户）
+                        if (comment.getReplyToUserId() != null) {
+                            recipientId = comment.getReplyToUserId();
+                        } else {
+                            // 如果没有 reply_to_user_id，则使用父评论的作者
+                            Comment parentComment = commentMapper.selectById(comment.getParentId());
+                            if (parentComment != null && parentComment.getUserId() != null) {
+                                recipientId = parentComment.getUserId();
+                            }
+                        }
+
+                        // 发送通知（如果接收者不是发送者本人）
+                        if (recipientId != null && !recipientId.equals(comment.getUserId())) {
+                            notificationService.createReplyNotification(
+                                recipientId,                // 被回复的用户ID
+                                comment.getUserId(),        // 回复用户ID
+                                post.getId(),               // 文章ID
+                                post.getTitle(),            // 文章标题
+                                comment.getContent()        // 回复内容
+                            );
+                        }
+                    } else {
+                        // 这是直接评论文章，发送评论通知
+                        notificationService.createCommentNotification(
+                            post.getUserId(),       // 文章作者ID
+                            comment.getUserId(),    // 评论用户ID
+                            post.getId(),           // 文章ID
+                            post.getTitle(),        // 文章标题
+                            comment.getContent()    // 评论内容
+                        );
+                    }
+                }
+            } catch (Exception e) {
+                // 通知发送失败不影响评论功能
+                System.err.println("发送评论通知失败: " + e.getMessage());
+            }
+        }
+
         return result;
     }
 

@@ -94,7 +94,7 @@ CREATE TABLE `category` (
 
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
-INSERT INTO `category` VALUES (1,'技术分享','分享技术相关的文章',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03'),(2,'生活随笔','记录生活中的点点滴滴',0,1,'2025-07-25 16:58:03','2025-07-31 17:25:33'),(3,'学习笔记','学习过程中的心得体会',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03');
+INSERT INTO `category` VALUES (1,'技术分享','分享技术相关的文章',0,4,'2025-07-25 16:58:03','2025-08-04 15:38:49'),(2,'生活随笔','记录生活中的点点滴滴',0,1,'2025-07-25 16:58:03','2025-07-31 17:25:33'),(3,'学习笔记','学习过程中的心得体会',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03');
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -111,10 +111,10 @@ CREATE TABLE `comment` (
   `user_id` int NOT NULL COMMENT '评论用户ID',
   `content` text NOT NULL COMMENT '评论内容',
   `parent_id` int DEFAULT NULL COMMENT '父评论ID',
-  `reply_to_user_id` int DEFAULT NULL COMMENT '被回复的用户ID',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `status` tinyint DEFAULT '1' COMMENT '状态 1-正常 0-隐藏',
-  `like_count` int DEFAULT '0' COMMENT '点赞次数',
+  `like_count` int DEFAULT '0' COMMENT '点赞数量',
+  `reply_to_user_id` int DEFAULT NULL COMMENT '被回复的用户ID',
   PRIMARY KEY (`id`),
   KEY `post_id` (`post_id`),
   KEY `user_id` (`user_id`),
@@ -124,7 +124,7 @@ CREATE TABLE `comment` (
   CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`),
   CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `comment_ibfk_3` FOREIGN KEY (`reply_to_user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -133,7 +133,7 @@ CREATE TABLE `comment` (
 
 LOCK TABLES `comment` WRITE;
 /*!40000 ALTER TABLE `comment` DISABLE KEYS */;
-INSERT INTO `comment` VALUES (1,1,2,'很棒的博客，期待更多精彩内容！',NULL,'2025-01-01 11:00:00',1,0),(2,2,2,'这个Spring Boot教程很实用，谢谢分享！',NULL,'2025-01-02 15:00:00',1,0),(3,2,1,'谢谢支持！后续会继续更新更多教程。',2,'2025-01-02 16:00:00',1,0),(4,3,1,'生活需要用心感受，很有感触的文章。',NULL,'2025-01-03 19:00:00',1,0),(5,2,2,'你好',NULL,'2025-07-25 20:45:15',1,0),(6,3,2,'1',NULL,'2025-07-30 14:56:42',1,0);
+INSERT INTO `comment` VALUES (1,1,2,'很棒的博客，期待更多精彩内容！',NULL,'2025-01-01 11:00:00',1,2,NULL),(2,2,2,'这个Spring Boot教程很实用，谢谢分享！',NULL,'2025-01-02 15:00:00',1,0,NULL),(3,2,1,'谢谢支持！后续会继续更新更多教程。',2,'2025-01-02 16:00:00',1,0,NULL),(4,3,1,'生活需要用心感受，很有感触的文章。',NULL,'2025-01-03 19:00:00',1,1,NULL),(5,2,2,'你好',NULL,'2025-07-25 20:45:15',1,0,NULL),(6,3,2,'1',NULL,'2025-07-30 14:56:42',1,1,NULL),(7,5,1,'这是一条测试评论，看起来很不错！',NULL,'2025-08-05 16:54:04',1,2,NULL),(8,5,1,'这是对第一条评论的回复',7,'2025-08-05 16:54:04',1,2,NULL),(9,5,1,'又一条主评论，用来测试评论功能',NULL,'2025-08-05 16:54:04',1,2,NULL),(10,2,1,'你好',5,'2025-08-05 17:19:05',1,0,NULL),(11,5,2,'这是sakura对第一条评论的回复',7,'2025-08-05 17:28:45',1,2,NULL),(12,5,1,'这是对sakura回复的再次回复',7,'2025-08-05 17:28:45',1,2,NULL),(13,1,1,'谢谢',1,'2025-08-05 17:30:44',1,2,NULL),(14,2,1,'🙃',5,'2025-08-05 17:36:11',1,0,NULL),(15,5,2,'很好  评论区很不错🥰',NULL,'2025-08-05 20:28:16',1,2,NULL),(16,5,1,'😓',7,'2025-08-05 21:17:14',1,0,NULL),(17,5,1,'好的😯',7,'2025-08-05 21:29:26',1,1,2),(18,1,2,'😍',1,'2025-08-06 17:33:42',1,2,1),(19,5,2,'aaa',7,'2025-08-06 19:31:36',1,0,1),(20,2,2,'很棒😊',NULL,'2025-08-06 19:32:10',1,0,NULL),(21,5,2,'你好',NULL,'2025-08-06 19:40:42',1,0,NULL),(22,5,2,'好的',7,'2025-08-06 19:40:55',1,0,1),(23,3,2,'test2😊',NULL,'2025-08-06 19:59:27',1,0,NULL),(24,1,2,'test',NULL,'2025-08-06 20:02:03',1,0,NULL),(25,1,2,'111',NULL,'2025-08-06 20:02:55',1,0,NULL),(26,5,2,'test',NULL,'2025-08-06 20:03:28',1,0,NULL),(27,5,2,'test',7,'2025-08-06 20:04:43',1,0,1),(28,5,2,'😊',NULL,'2025-08-06 20:10:56',1,0,NULL),(29,5,2,'哈哈哈🤤',7,'2025-08-06 20:11:12',1,1,1),(30,5,1,'你想干嘛',7,'2025-08-06 20:11:49',1,0,2),(31,5,2,'？？？',7,'2025-08-06 20:12:47',1,0,1),(32,5,1,'谢谢',15,'2025-08-06 20:13:56',1,0,2),(33,5,1,'哈哈',7,'2025-08-06 20:14:14',1,0,2),(34,5,1,'🤤',7,'2025-08-06 20:14:49',1,0,2),(35,5,2,'哈哈',7,'2025-08-06 20:15:26',1,0,1);
 /*!40000 ALTER TABLE `comment` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -188,7 +188,7 @@ CREATE TABLE `comment_like` (
   KEY `idx_user_id` (`user_id`),
   CONSTRAINT `fk_comment_like_comment` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_comment_like_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='评论点赞表';
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='评论点赞表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -197,6 +197,7 @@ CREATE TABLE `comment_like` (
 
 LOCK TABLES `comment_like` WRITE;
 /*!40000 ALTER TABLE `comment_like` DISABLE KEYS */;
+INSERT INTO `comment_like` VALUES (6,8,2,'2025-08-05 19:25:27'),(7,11,2,'2025-08-05 19:25:28'),(8,12,2,'2025-08-05 19:25:29'),(9,9,2,'2025-08-05 19:25:30'),(17,7,2,'2025-08-05 19:25:35'),(18,1,2,'2025-08-05 20:27:08'),(20,11,1,'2025-08-05 20:27:23'),(21,12,1,'2025-08-05 20:27:24'),(22,7,1,'2025-08-05 20:27:27'),(23,15,2,'2025-08-05 20:28:18'),(24,8,1,'2025-08-06 17:02:42'),(25,9,1,'2025-08-06 17:02:45'),(26,15,1,'2025-08-06 17:02:46'),(27,13,2,'2025-08-06 17:15:07'),(28,4,2,'2025-08-06 17:15:23'),(29,6,2,'2025-08-06 17:15:27'),(30,18,2,'2025-08-06 17:33:45'),(31,13,1,'2025-08-06 17:34:12'),(32,1,1,'2025-08-06 17:34:14'),(33,18,1,'2025-08-06 17:34:15'),(34,17,2,'2025-08-06 19:40:47'),(35,29,1,'2025-08-06 20:11:42');
 /*!40000 ALTER TABLE `comment_like` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -224,6 +225,45 @@ LOCK TABLES `friend_link` WRITE;
 /*!40000 ALTER TABLE `friend_link` DISABLE KEYS */;
 INSERT INTO `friend_link` VALUES (1,'binbin','www.baidu.com','百科全书'),(2,'github','https://gitee.com/sakurafengbinbin','my gitee');
 /*!40000 ALTER TABLE `friend_link` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `notification`
+--
+
+DROP TABLE IF EXISTS `notification`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `notification` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `recipient_id` int NOT NULL COMMENT '接收者用户ID',
+  `sender_id` int NOT NULL COMMENT '发送者用户ID',
+  `type` varchar(20) NOT NULL COMMENT '通知类型：LIKE, COMMENT, REPLY, FOLLOW',
+  `title` varchar(100) NOT NULL COMMENT '通知标题',
+  `content` text COMMENT '通知内容',
+  `related_id` int DEFAULT NULL COMMENT '相关对象ID（文章ID、评论ID等）',
+  `related_type` varchar(20) DEFAULT NULL COMMENT '相关对象类型：POST, COMMENT',
+  `is_read` tinyint(1) DEFAULT '0' COMMENT '是否已读',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `read_time` datetime DEFAULT NULL COMMENT '阅读时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_recipient_id` (`recipient_id`),
+  KEY `idx_sender_id` (`sender_id`),
+  KEY `idx_create_time` (`create_time`),
+  KEY `idx_is_read` (`is_read`),
+  CONSTRAINT `fk_notification_recipient` FOREIGN KEY (`recipient_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_notification_sender` FOREIGN KEY (`sender_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='消息通知表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `notification`
+--
+
+LOCK TABLES `notification` WRITE;
+/*!40000 ALTER TABLE `notification` DISABLE KEYS */;
+INSERT INTO `notification` VALUES (1,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《aa》：有人点赞了你的评论',5,'POST',1,'2025-08-06 17:02:46','2025-08-06 17:15:31'),(2,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《欢迎来到我的博客》',1,'POST',1,'2025-08-06 17:15:05','2025-08-06 17:15:59'),(3,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《欢迎来到我的博客》：有人点赞了你的评论',1,'POST',1,'2025-08-06 17:15:08','2025-08-06 17:18:29'),(4,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《今天的生活感悟》：有人点赞了你的评论',3,'POST',1,'2025-08-06 17:15:24','2025-08-06 17:18:28'),(5,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《今天的生活感悟》',3,'POST',1,'2025-08-06 17:15:26','2025-08-06 17:18:27'),(6,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《欢迎来到我的博客》：有人点赞了你的评论',1,'POST',1,'2025-08-06 17:34:15','2025-08-06 19:58:58'),(7,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《欢迎来到我的博客》：有人点赞了你的评论',1,'POST',1,'2025-08-06 17:34:16','2025-08-06 19:58:58'),(8,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',1,'2025-08-06 19:31:54','2025-08-06 19:32:38'),(9,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',1,'2025-08-06 19:40:45','2025-08-06 19:58:47'),(10,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《aa》：有人点赞了你的评论',5,'POST',1,'2025-08-06 19:40:48','2025-08-06 19:58:13'),(11,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《欢迎来到我的博客》',1,'POST',0,'2025-08-06 20:01:27',NULL),(12,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',0,'2025-08-06 20:03:37',NULL),(13,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',0,'2025-08-06 20:03:40',NULL),(14,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《aa》：😊',5,'POST',0,'2025-08-06 20:10:57',NULL),(15,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：哈哈哈🤤',5,'POST',1,'2025-08-06 20:11:12','2025-08-06 20:11:33'),(16,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《aa》：有人点赞了你的评论',5,'POST',1,'2025-08-06 20:11:42','2025-08-06 20:12:15'),(17,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：？？？',5,'POST',0,'2025-08-06 20:12:48',NULL),(18,2,1,'REPLY','收到新的回复','彬彬 回复了你在《aa》的评论：谢谢',5,'POST',0,'2025-08-06 20:13:57',NULL),(19,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：哈哈',5,'POST',0,'2025-08-06 20:15:27',NULL);
+/*!40000 ALTER TABLE `notification` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -283,7 +323,7 @@ CREATE TABLE `post` (
   FULLTEXT KEY `idx_title_content` (`title`,`content`),
   CONSTRAINT `post_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `post_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -292,7 +332,7 @@ CREATE TABLE `post` (
 
 LOCK TABLES `post` WRITE;
 /*!40000 ALTER TABLE `post` DISABLE KEYS */;
-INSERT INTO `post` VALUES (1,1,1,'欢迎来到我的博客','这是我的第一篇博客文章，欢迎大家来到我的个人博客！在这里我会分享技术心得、生活感悟和学习笔记。','欢迎来到我的博客，这里会分享各种有趣的内容','https://pic3.zhimg.com/v2-dae74e490ddc79d3ef21b09203084102_r.jpg',1,'2025-01-01 10:00:00','2025-07-31 10:54:20',0,0,0),(2,1,1,'Spring Boot 入门指南','Spring Boot 是一个基于 Spring 框架的快速开发框架，它简化了 Spring 应用的配置和部署过程。本文将介绍如何快速上手 Spring Boot 开发。1','Spring Boot 快速入门教程，适合初学者','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-02 14:30:00','2025-07-31 17:07:12',0,0,3),(3,1,2,'今天的生活感悟','<div style=\"text-align: left;\"><br></div><div style=\"text-align: left;\">生活就像一杯茶，需要慢慢品味。今天在公园散步时，看到了美丽的夕阳，让我想起了很多美好的回忆。</div>','记录今天的生活感悟和心情','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-03 18:00:00','2025-07-31 17:25:33',0,0,2);
+INSERT INTO `post` VALUES (1,1,1,'欢迎来到我的博客','这是我的第一篇博客文章，欢迎大家来到我的个人博客！在这里我会分享技术心得、生活感悟和学习笔记。','欢迎来到我的博客，这里会分享各种有趣的内容','https://pic3.zhimg.com/v2-dae74e490ddc79d3ef21b09203084102_r.jpg',1,'2025-01-01 10:00:00','2025-08-06 20:02:58',16,1,5),(2,1,1,'Spring Boot 入门指南','Spring Boot 是一个基于 Spring 框架的快速开发框架，它简化了 Spring 应用的配置和部署过程。本文将介绍如何快速上手 Spring Boot 开发。1','Spring Boot 快速入门教程，适合初学者','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-02 14:30:00','2025-08-06 19:59:02',3,0,6),(3,1,2,'今天的生活感悟','<div style=\"text-align: left;\"><br></div><div style=\"text-align: left;\">生活就像一杯茶，需要慢慢品味。今天在公园散步时，看到了美丽的夕阳，让我想起了很多美好的回忆。</div>','记录今天的生活感悟和心情','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-03 18:00:00','2025-08-06 20:03:14',8,1,3),(4,1,1,'a','aaaasddddddddd','aaa','/api/files/c3aa19454df94fe1a56c1782a1385107.jpg',1,'2025-08-04 15:20:47','2025-08-06 19:40:23',7,1,0),(5,1,1,'aa','aaaaaaaaaaaaaaaaaaaaaaaa','a','/api/files/9c2bdedaf12a48908d603d581eac307f.jpg',1,'2025-08-04 15:38:49','2025-08-06 20:15:26',39,1,21);
 /*!40000 ALTER TABLE `post` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -374,7 +414,7 @@ CREATE TABLE `post_like` (
   KEY `idx_user_id` (`user_id`),
   CONSTRAINT `fk_post_like_post` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_post_like_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='文章点赞表';
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='文章点赞表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -383,6 +423,7 @@ CREATE TABLE `post_like` (
 
 LOCK TABLES `post_like` WRITE;
 /*!40000 ALTER TABLE `post_like` DISABLE KEYS */;
+INSERT INTO `post_like` VALUES (1,4,2,'2025-08-05 21:07:52'),(3,3,2,'2025-08-06 17:15:26'),(6,1,2,'2025-08-06 20:01:27'),(8,5,2,'2025-08-06 20:03:39');
 /*!40000 ALTER TABLE `post_like` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -409,7 +450,7 @@ CREATE TABLE `post_tag` (
 
 LOCK TABLES `post_tag` WRITE;
 /*!40000 ALTER TABLE `post_tag` DISABLE KEYS */;
-INSERT INTO `post_tag` VALUES (1,1),(2,1),(3,1),(1,2),(2,2),(3,2),(3,3),(3,4),(3,5),(2,6),(3,6),(3,7);
+INSERT INTO `post_tag` VALUES (1,1),(2,1),(3,1),(4,1),(5,1),(1,2),(2,2),(3,2),(4,2),(3,3),(3,4),(3,5),(2,6),(3,6),(4,6),(3,7);
 /*!40000 ALTER TABLE `post_tag` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -584,4 +625,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-31 21:45:57
+-- Dump completed on 2025-08-06 20:16:48

@@ -63,9 +63,9 @@
               >
                 <div class="article-cover" v-if="article.cover">
                   <img
-                    :src="article.cover"
+                    :src="processImageUrl(article.cover, 'cover')"
                     :alt="article.title"
-                    @error="handleImageError"
+                    @error="(e) => handleImageError(e, 'cover')"
                     loading="lazy"
                   />
                   <div class="cover-overlay">
@@ -251,11 +251,12 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
-  ArrowDown, View, ArrowRight
+  ArrowDown, View, ArrowRight, User, Calendar
 } from '@element-plus/icons-vue'
 import { useBlogStore } from '@/stores/blog'
 import { useUserStore } from '@/stores/user'
 import { formatDate } from '@/utils/date'
+import { processImageUrl, handleImageError } from '@/utils/imageUtils'
 import { blogApi } from '@/utils/api'
 
 const router = useRouter()
@@ -339,12 +340,7 @@ const openFriendLink = (url) => {
   window.open(fullUrl, '_blank')
 }
 
-// 处理图片加载错误
-const handleImageError = (event) => {
-  console.error('图片加载失败:', event.target.src)
-  // 设置默认图片
-  event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop'
-}
+
 
 
 

@@ -39,8 +39,8 @@
             </el-form-item>
 
             <el-form-item prop="email">
-              <el-input 
-                v-model="registerForm.email" 
+              <el-input
+                v-model="registerForm.email"
                 placeholder="请输入邮箱"
                 size="large"
                 clearable
@@ -49,6 +49,34 @@
                   <el-icon><Message /></el-icon>
                 </template>
               </el-input>
+            </el-form-item>
+
+            <el-form-item prop="verifyCode">
+              <div class="verify-code-wrapper">
+                <el-input
+                  v-model="registerForm.verifyCode"
+                  placeholder="请输入邮箱验证码"
+                  size="large"
+                  clearable
+                  maxlength="6"
+                >
+                  <template #prefix>
+                    <el-icon><Key /></el-icon>
+                  </template>
+                </el-input>
+                <el-button
+                  type="primary"
+                  size="large"
+                  @click="sendVerifyCode"
+                  :disabled="!registerForm.email || sendCodeLoading || countdown > 0"
+                  :loading="sendCodeLoading"
+                  class="send-code-btn"
+                >
+                  <span v-if="countdown > 0">{{ countdown }}s后重发</span>
+                  <span v-else-if="sendCodeLoading">发送中...</span>
+                  <span v-else>发送验证码</span>
+                </el-button>
+              </div>
             </el-form-item>
 
             <el-form-item prop="password">
@@ -165,13 +193,15 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { User, Lock, Message, House } from '@element-plus/icons-vue'
+import { User, Lock, Message, House, Key } from '@element-plus/icons-vue'
 import { userApi } from '@/utils/api'
 
 const router = useRouter()
 
 // 响应式数据
 const loading = ref(false)
+const sendCodeLoading = ref(false)
+const countdown = ref(0)
 const termsVisible = ref(false)
 const privacyVisible = ref(false)
 const registerFormRef = ref()
@@ -181,6 +211,7 @@ const registerForm = reactive({
   email: '',
   password: '',
   confirmPassword: '',
+  verifyCode: '',
   agreement: false
 })
 
@@ -212,6 +243,10 @@ const rules = {
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
   ],
+  verifyCode: [
+    { required: true, message: '请输入验证码', trigger: 'blur' },
+    { pattern: /^\d{6}$/, message: '验证码必须是6位数字', trigger: 'blur' }
+  ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' },
@@ -226,20 +261,65 @@ const rules = {
   ]
 }
 
+// 发送验证码
+const sendVerifyCode = async () => {
+  // 验证邮箱格式
+  if (!registerForm.email) {
+    ElMessage.warning('请先输入邮箱')
+    return
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(registerForm.email)) {
+    ElMessage.warning('请输入正确的邮箱格式')
+    return
+  }
+
+  try {
+    sendCodeLoading.value = true
+    const response = await userApi.sendCode(registerForm.email)
+
+    if (response.code === 200) {
+      ElMessage.success('验证码已发送，请查收邮箱')
+      // 开始倒计时
+      startCountdown()
+    } else {
+      ElMessage.error(response.message || '发送验证码失败')
+    }
+  } catch (error) {
+    console.error('发送验证码失败:', error)
+    ElMessage.error('发送验证码失败，请稍后重试')
+  } finally {
+    sendCodeLoading.value = false
+  }
+}
+
+// 倒计时功能
+const startCountdown = () => {
+  countdown.value = 60
+  const timer = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(timer)
+    }
+  }, 1000)
+}
+
 // 注册处理
 const handleRegister = async () => {
   if (!registerFormRef.value) return
-  
+
   try {
     await registerFormRef.value.validate()
     loading.value = true
-    
+
     const response = await userApi.register({
       username: registerForm.username,
       email: registerForm.email,
-      password: registerForm.password
+      password: registerForm.password,
+      code: registerForm.verifyCode
     })
-    
+
     if (response.code === 200) {
       ElMessage.success('注册成功，请登录')
       router.push('/user/login')
@@ -478,5 +558,29 @@ const showPrivacy = () => {
 
 :deep(.el-checkbox__label) {
   color: #7f8c8d;
+}
+
+/* 验证码输入框样式 */
+.verify-code-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.verify-code-wrapper .el-input {
+  flex: 1;
+}
+
+.send-code-btn {
+  flex-shrink: 0;
+  min-width: 120px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.send-code-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

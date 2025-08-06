@@ -5,7 +5,10 @@ export const userApi = {
   // 用户登录
   login: (data) => request.post('/user/auth/login', data),
   // 用户注册
-  register: (data) => request.post('/user/add', data),
+  register: (data) => {
+    const { code, ...userData } = data
+    return request.post('/user/add', userData, { params: { code } })
+  },
   // 发送验证码
   sendCode: (email) => request.post('/user/sendEmailCode', { email }),
   // 获取所有用户
@@ -195,4 +198,38 @@ export const commonApi = {
   }),
   // 获取当前用户信息
   getCurrentUser: () => request.get('/auth/info')
+}
+
+// 消息通知API
+export const notificationApi = {
+  // 获取通知列表
+  getNotifications: (page = 1, size = 10, filters = {}) => {
+    const params = { page, size, ...filters }
+    return request.get('/api/notifications', { params })
+  },
+
+  // 获取未读通知数量
+  getUnreadCount: () => {
+    return request.get('/api/notifications/unread-count')
+  },
+
+  // 获取最近的未读通知
+  getRecentNotifications: (limit = 5) => {
+    return request.get('/api/notifications/recent', { params: { limit } })
+  },
+
+  // 标记通知为已读
+  markAsRead: (notificationId) => {
+    return request.put(`/api/notifications/${notificationId}/read`)
+  },
+
+  // 标记所有通知为已读
+  markAllAsRead: () => {
+    return request.put('/api/notifications/read-all')
+  },
+
+  // 删除通知
+  deleteNotification: (notificationId) => {
+    return request.delete(`/api/notifications/${notificationId}`)
+  }
 }

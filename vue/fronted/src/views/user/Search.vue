@@ -105,9 +105,9 @@
             </div>
             <div class="result-cover" v-if="result.cover">
               <img
-                :src="result.cover"
+                :src="processImageUrl(result.cover, 'cover')"
                 :alt="result.title"
-                @error="handleImageError"
+                @error="(e) => handleImageError(e, 'cover')"
                 loading="lazy"
               />
             </div>
@@ -198,6 +198,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, User, Calendar, Folder, View } from '@element-plus/icons-vue'
 import { blogApi, categoryApi } from '@/utils/api'
+import { processImageUrl, handleImageError } from '@/utils/imageUtils'
 
 const route = useRoute()
 const router = useRouter()
@@ -344,12 +345,7 @@ watch(() => route.query.q, (newQuery) => {
   }
 }, { immediate: true })
 
-// 处理图片加载错误
-const handleImageError = (event) => {
-  console.error('图片加载失败:', event.target.src)
-  // 设置默认图片
-  event.target.src = 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop'
-}
+
 
 // 初始化
 onMounted(() => {

@@ -1,8 +1,10 @@
 package llf.llf.service;
 
+import llf.llf.pojo.Post;
 import llf.llf.common.Result;
 import llf.llf.mapper.PostLikeMapper;
 import llf.llf.mapper.PostMapper;
+import llf.llf.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +19,12 @@ public class PostLikeService {
 
     @Autowired
     private PostLikeMapper postLikeMapper;
-    
+
     @Autowired
     private PostMapper postMapper;
+
+    @Autowired
+    private NotificationService notificationService;
 
     /**
      * 切换点赞状态（点赞/取消点赞）
@@ -29,7 +34,7 @@ public class PostLikeService {
         try {
             // 检查是否已点赞
             int isLiked = postLikeMapper.checkUserLike(postId, userId);
-            
+
             if (isLiked > 0) {
                 // 已点赞，取消点赞
                 postLikeMapper.removeLike(postId, userId);
@@ -41,6 +46,23 @@ public class PostLikeService {
                 postLikeMapper.addLike(postId, userId);
                 // 更新文章点赞数量
                 updatePostLikeCount(postId);
+
+                // 发送点赞通知
+                try {
+                    Post post = postMapper.selectById(postId);
+                    if (post != null && post.getUserId() != null) {
+                        notificationService.createLikeNotification(
+                            post.getUserId(),  // 文章作者ID
+                            userId,            // 点赞用户ID
+                            postId,            // 文章ID
+                            post.getTitle()    // 文章标题
+                        );
+                    }
+                } catch (Exception e) {
+                    // 通知发送失败不影响点赞功能
+                    System.err.println("发送点赞通知失败: " + e.getMessage());
+                }
+
                 return Result.success("点赞成功");
             }
         } catch (Exception e) {

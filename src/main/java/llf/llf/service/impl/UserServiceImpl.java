@@ -56,11 +56,10 @@ public class UserServiceImpl implements UserService {
         redisEmailCodeService.saveCode(lastSendKey, String.valueOf(System.currentTimeMillis()));
 
         try {
-            // 6. 发送邮件 (测试模式：直接打印验证码)
+            // 6. 发送邮件
             System.out.println("【验证码服务】邮箱: " + email + " | 验证码: " + code + " | 有效期: 5分钟");
 
-            // 实际邮件发送代码（生产环境启用）
-            /*
+            // 实际邮件发送代码
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
             message.setTo(email);
@@ -68,11 +67,12 @@ public class UserServiceImpl implements UserService {
             message.setText(buildEmailContent(code));
             mailSender.send(message);
             System.out.println("验证码邮件发送成功: " + email);
-            */
 
         } catch (Exception e) {
             System.err.println("验证码邮件发送失败: " + email + " | 错误: " + e.getMessage());
             // 邮件发送失败不影响验证码的使用，因为已保存到缓存
+            // 但是需要抛出异常让前端知道发送失败
+            throw new BusinessException("邮件发送失败: " + e.getMessage());
         }
 
         return code;

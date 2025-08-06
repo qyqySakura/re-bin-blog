@@ -5,6 +5,7 @@ import llf.llf.common.Result;
 import llf.llf.pojo.Comment;
 import llf.llf.service.CommentService;
 import llf.llf.service.CommentLikeService;
+import llf.llf.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,9 @@ public class CommentController {
 
     @Autowired
     private CommentLikeService commentLikeService;
+
+    @Autowired
+    private BlogService blogService;
 
     /**
      * 获取当前登录用户的ID（处理Sa-Token的字符串格式）
@@ -74,8 +78,28 @@ public class CommentController {
 
     // 新增评论
     @PostMapping("/add")
-    public Result<Integer> createComment(@RequestBody Comment comment) {
-        return Result.success(commentService.add(comment));
+    public Result<String> createComment(@RequestBody Comment comment) {
+        // 检查用户是否登录
+        if (!StpUtil.isLogin()) {
+            return Result.unauthorized("请先登录");
+        }
+
+        Integer userId = getCurrentUserId();
+        if (userId == null) {
+            return Result.badRequest("用户ID格式错误");
+        }
+
+        // 设置评论的用户ID
+        comment.setUserId(userId);
+
+        // 使用BlogService的addComment方法，这样会触发通知逻辑
+        int result = blogService.addComment(comment);
+
+        if (result > 0) {
+            return Result.success("评论成功");
+        } else {
+            return Result.error(500, "评论失败");
+        }
     }
 
     // 更新评论
