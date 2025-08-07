@@ -58,6 +58,12 @@ public class UserController {
 
         User foundUser = userService.login(user.getUsername(), user.getPassword());
         if (foundUser != null) {
+            // 检查用户状态
+            if (foundUser.getStatus() == null || foundUser.getStatus() == 0) {
+                System.out.println("登录失败：账户已被禁用 - 用户名: " + foundUser.getUsername());
+                return Result.error(403, "您的账户已被管理员禁用，如有疑问请联系客服");
+            }
+
             // 使用Sa-Token登录，使用用户ID作为登录标识，并添加用户类型前缀
             String loginId = "user_" + foundUser.getId();
             SaTokenUtil.login(loginId);

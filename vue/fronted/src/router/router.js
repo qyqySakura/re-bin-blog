@@ -19,10 +19,15 @@ import UserNotifications from '../views/user/Notifications.vue'
 import Search from '../views/user/Search.vue'
 import UserList from '../views/user/index.vue'
 import AdminList from '../views/admin/index.vue'
+import Dashboard from '../views/admin/Dashboard.vue'
+import UserManage from '../views/admin/UserManage.vue'
+import AdminManage from '../views/admin/AdminManage.vue'
 import PostManage from '../views/admin/PostManage.vue'
 import CategoryManage from '../views/admin/CategoryManage.vue'
 import TagManage from '../views/admin/TagManage.vue'
 import CommentManage from '../views/admin/CommentManage.vue'
+import Settings from '../views/admin/Settings.vue'
+import Logs from '../views/admin/Logs.vue'
 import Test from '../views/Test.vue'
 
 
@@ -42,7 +47,12 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/admin/posts'
+        redirect: '/admin/dashboard'
+      },
+      {
+        path: 'dashboard',
+        component: Dashboard,
+        meta: { requiresAuth: true, title: '仪表盘' }
       },
       {
         path: 'posts',
@@ -66,13 +76,23 @@ const routes = [
       },
       {
         path: 'users',
-        component: UserList,
+        component: UserManage,
         meta: { requiresAuth: true, title: '用户管理' }
       },
       {
         path: 'admins',
-        component: AdminList,
+        component: AdminManage,
         meta: { requiresAuth: true, title: '管理员管理' }
+      },
+      {
+        path: 'settings',
+        component: Settings,
+        meta: { requiresAuth: true, title: '系统设置' }
+      },
+      {
+        path: 'logs',
+        component: Logs,
+        meta: { requiresAuth: true, title: '系统日志' }
       }
     ]
   },

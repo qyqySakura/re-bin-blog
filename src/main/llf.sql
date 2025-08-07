@@ -85,7 +85,7 @@ CREATE TABLE `category` (
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,7 +94,7 @@ CREATE TABLE `category` (
 
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
-INSERT INTO `category` VALUES (1,'技术分享','分享技术相关的文章',0,4,'2025-07-25 16:58:03','2025-08-04 15:38:49'),(2,'生活随笔','记录生活中的点点滴滴',0,1,'2025-07-25 16:58:03','2025-07-31 17:25:33'),(3,'学习笔记','学习过程中的心得体会',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03');
+INSERT INTO `category` VALUES (1,'技术分享','分享技术相关的文章',0,4,'2025-07-25 16:58:03','2025-08-04 15:38:49'),(2,'生活随笔','记录生活中的点点滴滴',0,1,'2025-07-25 16:58:03','2025-07-31 17:25:33'),(3,'学习笔记','学习过程中的心得体会',0,0,'2025-07-25 16:58:03','2025-07-25 16:58:03'),(4,'1','1',0,0,'2025-08-07 09:32:43','2025-08-07 09:32:43');
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -124,7 +124,7 @@ CREATE TABLE `comment` (
   CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`),
   CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `comment_ibfk_3` FOREIGN KEY (`reply_to_user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -133,7 +133,7 @@ CREATE TABLE `comment` (
 
 LOCK TABLES `comment` WRITE;
 /*!40000 ALTER TABLE `comment` DISABLE KEYS */;
-INSERT INTO `comment` VALUES (1,1,2,'很棒的博客，期待更多精彩内容！',NULL,'2025-01-01 11:00:00',1,2,NULL),(2,2,2,'这个Spring Boot教程很实用，谢谢分享！',NULL,'2025-01-02 15:00:00',1,0,NULL),(3,2,1,'谢谢支持！后续会继续更新更多教程。',2,'2025-01-02 16:00:00',1,0,NULL),(4,3,1,'生活需要用心感受，很有感触的文章。',NULL,'2025-01-03 19:00:00',1,1,NULL),(5,2,2,'你好',NULL,'2025-07-25 20:45:15',1,0,NULL),(6,3,2,'1',NULL,'2025-07-30 14:56:42',1,1,NULL),(7,5,1,'这是一条测试评论，看起来很不错！',NULL,'2025-08-05 16:54:04',1,2,NULL),(8,5,1,'这是对第一条评论的回复',7,'2025-08-05 16:54:04',1,2,NULL),(9,5,1,'又一条主评论，用来测试评论功能',NULL,'2025-08-05 16:54:04',1,2,NULL),(10,2,1,'你好',5,'2025-08-05 17:19:05',1,0,NULL),(11,5,2,'这是sakura对第一条评论的回复',7,'2025-08-05 17:28:45',1,2,NULL),(12,5,1,'这是对sakura回复的再次回复',7,'2025-08-05 17:28:45',1,2,NULL),(13,1,1,'谢谢',1,'2025-08-05 17:30:44',1,2,NULL),(14,2,1,'🙃',5,'2025-08-05 17:36:11',1,0,NULL),(15,5,2,'很好  评论区很不错🥰',NULL,'2025-08-05 20:28:16',1,2,NULL),(16,5,1,'😓',7,'2025-08-05 21:17:14',1,0,NULL),(17,5,1,'好的😯',7,'2025-08-05 21:29:26',1,1,2),(18,1,2,'😍',1,'2025-08-06 17:33:42',1,2,1),(19,5,2,'aaa',7,'2025-08-06 19:31:36',1,0,1),(20,2,2,'很棒😊',NULL,'2025-08-06 19:32:10',1,0,NULL),(21,5,2,'你好',NULL,'2025-08-06 19:40:42',1,0,NULL),(22,5,2,'好的',7,'2025-08-06 19:40:55',1,0,1),(23,3,2,'test2😊',NULL,'2025-08-06 19:59:27',1,0,NULL),(24,1,2,'test',NULL,'2025-08-06 20:02:03',1,0,NULL),(25,1,2,'111',NULL,'2025-08-06 20:02:55',1,0,NULL),(26,5,2,'test',NULL,'2025-08-06 20:03:28',1,0,NULL),(27,5,2,'test',7,'2025-08-06 20:04:43',1,0,1),(28,5,2,'😊',NULL,'2025-08-06 20:10:56',1,0,NULL),(29,5,2,'哈哈哈🤤',7,'2025-08-06 20:11:12',1,1,1),(30,5,1,'你想干嘛',7,'2025-08-06 20:11:49',1,0,2),(31,5,2,'？？？',7,'2025-08-06 20:12:47',1,0,1),(32,5,1,'谢谢',15,'2025-08-06 20:13:56',1,0,2),(33,5,1,'哈哈',7,'2025-08-06 20:14:14',1,0,2),(34,5,1,'🤤',7,'2025-08-06 20:14:49',1,0,2),(35,5,2,'哈哈',7,'2025-08-06 20:15:26',1,0,1);
+INSERT INTO `comment` VALUES (1,1,2,'很棒的博客，期待更多精彩内容！',NULL,'2025-01-01 11:00:00',1,2,NULL),(2,2,2,'这个Spring Boot教程很实用，谢谢分享！',NULL,'2025-01-02 15:00:00',1,0,NULL),(3,2,1,'谢谢支持！后续会继续更新更多教程。',2,'2025-01-02 16:00:00',1,0,NULL),(4,3,1,'生活需要用心感受，很有感触的文章。',NULL,'2025-01-03 19:00:00',1,1,NULL),(5,2,2,'你好',NULL,'2025-07-25 20:45:15',1,0,NULL),(6,3,2,'1',NULL,'2025-07-30 14:56:42',1,1,NULL),(7,5,1,'这是一条测试评论，看起来很不错！',NULL,'2025-08-05 16:54:04',1,2,NULL),(8,5,1,'这是对第一条评论的回复',7,'2025-08-05 16:54:04',1,2,NULL),(9,5,1,'又一条主评论，用来测试评论功能',NULL,'2025-08-05 16:54:04',1,2,NULL),(10,2,1,'你好',5,'2025-08-05 17:19:05',1,0,NULL),(11,5,2,'这是sakura对第一条评论的回复',7,'2025-08-05 17:28:45',1,2,NULL),(12,5,1,'这是对sakura回复的再次回复',7,'2025-08-05 17:28:45',1,2,NULL),(13,1,1,'谢谢',1,'2025-08-05 17:30:44',1,2,NULL),(14,2,1,'🙃',5,'2025-08-05 17:36:11',1,0,NULL),(15,5,2,'很好  评论区很不错🥰',NULL,'2025-08-05 20:28:16',1,2,NULL),(16,5,1,'😓',7,'2025-08-05 21:17:14',1,0,NULL),(17,5,1,'好的😯',7,'2025-08-05 21:29:26',1,1,2),(18,1,2,'😍',1,'2025-08-06 17:33:42',1,2,1),(19,5,2,'aaa',7,'2025-08-06 19:31:36',1,0,1),(20,2,2,'很棒😊',NULL,'2025-08-06 19:32:10',1,0,NULL),(21,5,2,'你好',NULL,'2025-08-06 19:40:42',1,0,NULL),(22,5,2,'好的',7,'2025-08-06 19:40:55',1,0,1),(23,3,2,'test2😊',NULL,'2025-08-06 19:59:27',1,0,NULL),(24,1,2,'test',NULL,'2025-08-06 20:02:03',1,0,NULL),(25,1,2,'111',NULL,'2025-08-06 20:02:55',1,0,NULL),(26,5,2,'test',NULL,'2025-08-06 20:03:28',1,0,NULL),(27,5,2,'test',7,'2025-08-06 20:04:43',1,0,1),(28,5,2,'😊',NULL,'2025-08-06 20:10:56',1,0,NULL),(29,5,2,'哈哈哈🤤',7,'2025-08-06 20:11:12',1,1,1),(30,5,1,'你想干嘛',7,'2025-08-06 20:11:49',1,0,2),(31,5,2,'？？？',7,'2025-08-06 20:12:47',1,0,1),(32,5,1,'谢谢',15,'2025-08-06 20:13:56',1,0,2),(33,5,1,'哈哈',7,'2025-08-06 20:14:14',1,0,2),(34,5,1,'🤤',7,'2025-08-06 20:14:49',1,0,2),(35,5,2,'哈哈',7,'2025-08-06 20:15:26',1,0,1),(36,5,1,'test\n',7,'2025-08-06 20:31:24',1,0,2),(37,5,2,'test',7,'2025-08-06 20:49:54',1,0,1),(38,5,1,'好了吧',7,'2025-08-06 20:50:38',1,0,2);
 /*!40000 ALTER TABLE `comment` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -253,7 +253,7 @@ CREATE TABLE `notification` (
   KEY `idx_is_read` (`is_read`),
   CONSTRAINT `fk_notification_recipient` FOREIGN KEY (`recipient_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_notification_sender` FOREIGN KEY (`sender_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='消息通知表';
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='消息通知表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -262,7 +262,7 @@ CREATE TABLE `notification` (
 
 LOCK TABLES `notification` WRITE;
 /*!40000 ALTER TABLE `notification` DISABLE KEYS */;
-INSERT INTO `notification` VALUES (1,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《aa》：有人点赞了你的评论',5,'POST',1,'2025-08-06 17:02:46','2025-08-06 17:15:31'),(2,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《欢迎来到我的博客》',1,'POST',1,'2025-08-06 17:15:05','2025-08-06 17:15:59'),(3,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《欢迎来到我的博客》：有人点赞了你的评论',1,'POST',1,'2025-08-06 17:15:08','2025-08-06 17:18:29'),(4,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《今天的生活感悟》：有人点赞了你的评论',3,'POST',1,'2025-08-06 17:15:24','2025-08-06 17:18:28'),(5,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《今天的生活感悟》',3,'POST',1,'2025-08-06 17:15:26','2025-08-06 17:18:27'),(6,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《欢迎来到我的博客》：有人点赞了你的评论',1,'POST',1,'2025-08-06 17:34:15','2025-08-06 19:58:58'),(7,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《欢迎来到我的博客》：有人点赞了你的评论',1,'POST',1,'2025-08-06 17:34:16','2025-08-06 19:58:58'),(8,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',1,'2025-08-06 19:31:54','2025-08-06 19:32:38'),(9,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',1,'2025-08-06 19:40:45','2025-08-06 19:58:47'),(10,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《aa》：有人点赞了你的评论',5,'POST',1,'2025-08-06 19:40:48','2025-08-06 19:58:13'),(11,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《欢迎来到我的博客》',1,'POST',0,'2025-08-06 20:01:27',NULL),(12,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',0,'2025-08-06 20:03:37',NULL),(13,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',0,'2025-08-06 20:03:40',NULL),(14,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《aa》：😊',5,'POST',0,'2025-08-06 20:10:57',NULL),(15,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：哈哈哈🤤',5,'POST',1,'2025-08-06 20:11:12','2025-08-06 20:11:33'),(16,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《aa》：有人点赞了你的评论',5,'POST',1,'2025-08-06 20:11:42','2025-08-06 20:12:15'),(17,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：？？？',5,'POST',0,'2025-08-06 20:12:48',NULL),(18,2,1,'REPLY','收到新的回复','彬彬 回复了你在《aa》的评论：谢谢',5,'POST',0,'2025-08-06 20:13:57',NULL),(19,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：哈哈',5,'POST',0,'2025-08-06 20:15:27',NULL);
+INSERT INTO `notification` VALUES (1,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《aa》：有人点赞了你的评论',5,'POST',1,'2025-08-06 17:02:46','2025-08-06 17:15:31'),(2,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《欢迎来到我的博客》',1,'POST',1,'2025-08-06 17:15:05','2025-08-06 17:15:59'),(3,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《欢迎来到我的博客》：有人点赞了你的评论',1,'POST',1,'2025-08-06 17:15:08','2025-08-06 17:18:29'),(4,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《今天的生活感悟》：有人点赞了你的评论',3,'POST',1,'2025-08-06 17:15:24','2025-08-06 17:18:28'),(5,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《今天的生活感悟》',3,'POST',1,'2025-08-06 17:15:26','2025-08-06 17:18:27'),(6,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《欢迎来到我的博客》：有人点赞了你的评论',1,'POST',1,'2025-08-06 17:34:15','2025-08-06 19:58:58'),(7,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《欢迎来到我的博客》：有人点赞了你的评论',1,'POST',1,'2025-08-06 17:34:16','2025-08-06 19:58:58'),(8,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',1,'2025-08-06 19:31:54','2025-08-06 19:32:38'),(9,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',1,'2025-08-06 19:40:45','2025-08-06 19:58:47'),(10,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《aa》：有人点赞了你的评论',5,'POST',1,'2025-08-06 19:40:48','2025-08-06 19:58:13'),(11,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《欢迎来到我的博客》',1,'POST',0,'2025-08-06 20:01:27',NULL),(12,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',0,'2025-08-06 20:03:37',NULL),(13,1,2,'LIKE','收到新的点赞','sakura 点赞了你的文章《aa》',5,'POST',0,'2025-08-06 20:03:40',NULL),(14,1,2,'COMMENT','收到新的评论','sakura 评论了你的文章《aa》：😊',5,'POST',0,'2025-08-06 20:10:57',NULL),(15,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：哈哈哈🤤',5,'POST',1,'2025-08-06 20:11:12','2025-08-06 20:11:33'),(16,2,1,'COMMENT','收到新的评论','彬彬 评论了你的文章《aa》：有人点赞了你的评论',5,'POST',1,'2025-08-06 20:11:42','2025-08-06 20:12:15'),(17,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：？？？',5,'POST',0,'2025-08-06 20:12:48',NULL),(18,2,1,'REPLY','收到新的回复','彬彬 回复了你在《aa》的评论：谢谢',5,'POST',1,'2025-08-06 20:13:57','2025-08-06 20:32:04'),(19,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：哈哈',5,'POST',1,'2025-08-06 20:15:27','2025-08-06 20:50:20'),(20,1,2,'REPLY','收到新的回复','sakura 回复了你在《aa》的评论：test',5,'POST',1,'2025-08-06 20:49:55','2025-08-06 20:50:04'),(21,2,1,'REPLY','收到新的回复','彬彬 回复了你在《aa》的评论：好了吧',5,'POST',1,'2025-08-06 20:50:39','2025-08-06 20:52:02');
 /*!40000 ALTER TABLE `notification` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -332,7 +332,7 @@ CREATE TABLE `post` (
 
 LOCK TABLES `post` WRITE;
 /*!40000 ALTER TABLE `post` DISABLE KEYS */;
-INSERT INTO `post` VALUES (1,1,1,'欢迎来到我的博客','这是我的第一篇博客文章，欢迎大家来到我的个人博客！在这里我会分享技术心得、生活感悟和学习笔记。','欢迎来到我的博客，这里会分享各种有趣的内容','https://pic3.zhimg.com/v2-dae74e490ddc79d3ef21b09203084102_r.jpg',1,'2025-01-01 10:00:00','2025-08-06 20:02:58',16,1,5),(2,1,1,'Spring Boot 入门指南','Spring Boot 是一个基于 Spring 框架的快速开发框架，它简化了 Spring 应用的配置和部署过程。本文将介绍如何快速上手 Spring Boot 开发。1','Spring Boot 快速入门教程，适合初学者','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-02 14:30:00','2025-08-06 19:59:02',3,0,6),(3,1,2,'今天的生活感悟','<div style=\"text-align: left;\"><br></div><div style=\"text-align: left;\">生活就像一杯茶，需要慢慢品味。今天在公园散步时，看到了美丽的夕阳，让我想起了很多美好的回忆。</div>','记录今天的生活感悟和心情','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-03 18:00:00','2025-08-06 20:03:14',8,1,3),(4,1,1,'a','aaaasddddddddd','aaa','/api/files/c3aa19454df94fe1a56c1782a1385107.jpg',1,'2025-08-04 15:20:47','2025-08-06 19:40:23',7,1,0),(5,1,1,'aa','aaaaaaaaaaaaaaaaaaaaaaaa','a','/api/files/9c2bdedaf12a48908d603d581eac307f.jpg',1,'2025-08-04 15:38:49','2025-08-06 20:15:26',39,1,21);
+INSERT INTO `post` VALUES (1,1,1,'欢迎来到我的博客','这是我的第一篇博客文章，欢迎大家来到我的个人博客！在这里我会分享技术心得、生活感悟和学习笔记。','欢迎来到我的博客，这里会分享各种有趣的内容','https://pic3.zhimg.com/v2-dae74e490ddc79d3ef21b09203084102_r.jpg',1,'2025-01-01 10:00:00','2025-08-06 20:02:58',16,1,5),(2,1,1,'Spring Boot 入门指南','Spring Boot 是一个基于 Spring 框架的快速开发框架，它简化了 Spring 应用的配置和部署过程。本文将介绍如何快速上手 Spring Boot 开发。1','Spring Boot 快速入门教程，适合初学者','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-02 14:30:00','2025-08-06 19:59:02',3,0,6),(3,1,2,'今天的生活感悟','<div style=\"text-align: left;\"><br></div><div style=\"text-align: left;\">生活就像一杯茶，需要慢慢品味。今天在公园散步时，看到了美丽的夕阳，让我想起了很多美好的回忆。</div>','记录今天的生活感悟和心情','https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',1,'2025-01-03 18:00:00','2025-08-06 20:03:14',8,1,3),(4,1,1,'a','aaaasddddddddd','aaa','/api/files/c3aa19454df94fe1a56c1782a1385107.jpg',1,'2025-08-04 15:20:47','2025-08-06 19:40:23',7,1,0),(5,1,1,'aa','aaaaaaaaaaaaaaaaaaaaaaaa','a','/api/files/9c2bdedaf12a48908d603d581eac307f.jpg',1,'2025-08-04 15:38:49','2025-08-06 20:57:21',45,1,24);
 /*!40000 ALTER TABLE `post` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -515,6 +515,41 @@ INSERT INTO `system_config` VALUES (1,'site_name','RE-BIN博客','网站名称',
 UNLOCK TABLES;
 
 --
+-- Table structure for table `system_log`
+--
+
+DROP TABLE IF EXISTS `system_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `system_log` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `level` varchar(10) NOT NULL COMMENT '日志级别：INFO, WARN, ERROR',
+  `module` varchar(50) NOT NULL COMMENT '模块名称',
+  `action` varchar(100) NOT NULL COMMENT '操作名称',
+  `message` text NOT NULL COMMENT '日志消息',
+  `user` varchar(50) DEFAULT NULL COMMENT '操作用户',
+  `ip` varchar(45) DEFAULT NULL COMMENT 'IP地址',
+  `details` text COMMENT '详细信息（JSON格式）',
+  `timestamp` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '时间戳',
+  PRIMARY KEY (`id`),
+  KEY `idx_level` (`level`),
+  KEY `idx_module` (`module`),
+  KEY `idx_user` (`user`),
+  KEY `idx_timestamp` (`timestamp`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='系统日志表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `system_log`
+--
+
+LOCK TABLES `system_log` WRITE;
+/*!40000 ALTER TABLE `system_log` DISABLE KEYS */;
+INSERT INTO `system_log` VALUES (1,'INFO','系统','系统启动','系统启动成功','系统','127.0.0.1',NULL,'2025-08-07 10:14:57'),(2,'INFO','用户管理','用户登录','管理员 admin 登录成功','admin','192.168.1.100',NULL,'2025-08-07 09:14:57'),(3,'WARN','文章管理','文章发布','文章标题过长，已自动截取','admin','192.168.1.100',NULL,'2025-08-07 08:14:57'),(4,'ERROR','数据库','连接超时','数据库连接在30秒后超时','系统','127.0.0.1',NULL,'2025-08-07 07:14:57'),(5,'INFO','评论管理','评论审核','评论审核通过','admin','192.168.1.100',NULL,'2025-08-07 06:14:57');
+/*!40000 ALTER TABLE `system_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `tag`
 --
 
@@ -625,4 +660,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-06 20:16:48
+-- Dump completed on 2025-08-07 10:42:35

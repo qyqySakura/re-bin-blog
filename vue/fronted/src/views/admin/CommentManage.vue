@@ -108,6 +108,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Check, Close, Delete } from '@element-plus/icons-vue'
+import request from '@/api/request'
 
 // 响应式数据
 const loading = ref(false)
@@ -118,48 +119,22 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
-// 模拟数据
-const mockComments = [
-  {
-    id: 1,
-    content: '这篇文章写得很好，学到了很多！',
-    status: 'pending',
-    user: {
-      id: 1,
-      name: '张三',
-      avatar: ''
-    },
-    post: {
-      id: 1,
-      title: 'Vue 3 Composition API 深度解析'
-    },
-    createTime: '2024-01-15 10:30:00'
-  },
-  {
-    id: 2,
-    content: '感谢分享，对我很有帮助！',
-    status: 'approved',
-    user: {
-      id: 2,
-      name: '李四',
-      avatar: ''
-    },
-    post: {
-      id: 2,
-      title: 'TypeScript 进阶技巧与实战'
-    },
-    createTime: '2024-01-14 15:20:00'
-  }
-]
-
 // 获取评论列表
 const fetchComments = async () => {
   try {
     loading.value = true
-    await new Promise(resolve => setTimeout(resolve, 500))
-    comments.value = mockComments
-    total.value = mockComments.length
+    const response = await request.get('/comments', {
+      params: {
+        status: statusFilter.value,
+        keyword: searchKeyword.value,
+        page: currentPage.value,
+        size: pageSize.value
+      }
+    })
+    comments.value = response.data || []
+    total.value = comments.value.length
   } catch (error) {
+    console.error('获取评论列表失败:', error)
     ElMessage.error('获取评论列表失败')
   } finally {
     loading.value = false
@@ -196,15 +171,14 @@ const formatDate = (dateString) => {
 // 通过评论
 const approveComment = async (commentId) => {
   try {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    const comment = comments.value.find(c => c.id === commentId)
-    if (comment) {
-      comment.status = 'approved'
-    }
-    
+    await request.put('/comments/update', {
+      id: commentId,
+      status: 1 // 1表示正常状态
+    })
+    await fetchComments() // 重新获取列表
     ElMessage.success('评论已通过')
   } catch (error) {
+    console.error('通过评论失败:', error)
     ElMessage.error('操作失败')
   }
 }
@@ -212,15 +186,14 @@ const approveComment = async (commentId) => {
 // 拒绝评论
 const rejectComment = async (commentId) => {
   try {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    const comment = comments.value.find(c => c.id === commentId)
-    if (comment) {
-      comment.status = 'rejected'
-    }
-    
+    await request.put('/comments/update', {
+      id: commentId,
+      status: 0 // 0表示隐藏状态
+    })
+    await fetchComments() // 重新获取列表
     ElMessage.success('评论已拒绝')
   } catch (error) {
+    console.error('拒绝评论失败:', error)
     ElMessage.error('操作失败')
   }
 }
@@ -237,15 +210,13 @@ const deleteComment = async (commentId) => {
         type: 'warning',
       }
     )
-    
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    comments.value = comments.value.filter(comment => comment.id !== commentId)
-    total.value--
-    
+
+    await request.delete(`/comments/del/${commentId}`)
+    await fetchComments() // 重新获取列表
     ElMessage.success('评论删除成功')
   } catch (error) {
     if (error !== 'cancel') {
+      console.error('删除评论失败:', error)
       ElMessage.error('删除失败')
     }
   }

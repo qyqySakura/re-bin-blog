@@ -14,8 +14,13 @@ export const adminApi = {
   // 用户管理
   getUsers: () => request.get('/user'),
   getUserById: (id) => request.get(`/user/${id}`),
+  createUser: (data) => request.post('/user/add', data),
   updateUser: (data) => request.put('/user/update', data),
   deleteUser: (id) => request.delete(`/user/del/${id}`),
+
+  // 统计数据
+  getStats: () => request.get('/admins/stats'),
+  getRecentActivities: () => request.get('/admins/activities'),
 
   // 文章管理
   getAllPosts: () => request.get('/posts'),

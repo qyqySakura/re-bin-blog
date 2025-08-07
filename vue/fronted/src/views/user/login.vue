@@ -156,26 +156,22 @@ const rules = {
 // 登录处理
 const handleLogin = async () => {
   if (!loginFormRef.value) return
-  
+
   try {
     await loginFormRef.value.validate()
     loading.value = true
-    
-    const response = await userStore.login({
+
+    await userStore.login({
       username: loginForm.username,
       password: loginForm.password,
       remember: rememberMe.value
     })
-    
-    if (response.code === 200) {
-      ElMessage.success('登录成功')
-      router.push('/')
-    } else {
-      ElMessage.error(response.message || '登录失败')
-    }
+
+    ElMessage.success('登录成功')
+    router.push('/')
   } catch (error) {
     console.error('登录失败:', error)
-    ElMessage.error('登录失败，请检查用户名和密码')
+    // 错误信息已经在request拦截器中显示了，这里不需要重复显示
   } finally {
     loading.value = false
   }

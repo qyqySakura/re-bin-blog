@@ -80,6 +80,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete } from '@element-plus/icons-vue'
+import request from '@/api/request'
 
 // 响应式数据
 const loading = ref(false)
@@ -105,32 +106,15 @@ const rules = {
   ]
 }
 
-// 模拟数据
-const mockTags = [
-  {
-    id: 1,
-    name: 'Vue.js',
-    description: 'Vue.js 相关技术文章',
-    postCount: 15,
-    createTime: '2024-01-01'
-  },
-  {
-    id: 2,
-    name: 'JavaScript',
-    description: 'JavaScript 编程语言',
-    postCount: 25,
-    createTime: '2024-01-02'
-  }
-]
-
 // 获取标签列表
 const fetchTags = async () => {
   try {
     loading.value = true
-    await new Promise(resolve => setTimeout(resolve, 500))
-    tags.value = mockTags
-    total.value = mockTags.length
+    const response = await request.get('/tags')
+    tags.value = response.data || []
+    total.value = tags.value.length
   } catch (error) {
+    console.error('获取标签列表失败:', error)
     ElMessage.error('获取标签列表失败')
   } finally {
     loading.value = false
@@ -159,26 +143,19 @@ const handleSave = async () => {
   try {
     await tagFormRef.value.validate()
     saving.value = true
-    
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
+
     if (editingTag.value) {
       // 更新标签
-      const index = tags.value.findIndex(t => t.id === editingTag.value.id)
-      if (index !== -1) {
-        tags.value[index] = { ...tags.value[index], ...tagForm }
-      }
+      await request.put('/tags/update', {
+        id: editingTag.value.id,
+        ...tagForm
+      })
+      await fetchTags() // 重新获取列表
       ElMessage.success('标签更新成功')
     } else {
       // 添加标签
-      const newTag = {
-        id: Date.now(),
-        ...tagForm,
-        postCount: 0,
-        createTime: new Date().toISOString().split('T')[0]
-      }
-      tags.value.unshift(newTag)
-      total.value++
+      await request.post('/tags/add', tagForm)
+      await fetchTags() // 重新获取列表
       ElMessage.success('标签添加成功')
     }
     
@@ -203,15 +180,13 @@ const deleteTag = async (tagId) => {
         type: 'warning',
       }
     )
-    
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    tags.value = tags.value.filter(tag => tag.id !== tagId)
-    total.value--
-    
+
+    await request.delete(`/tags/del/${tagId}`)
+    await fetchTags() // 重新获取列表
     ElMessage.success('标签删除成功')
   } catch (error) {
     if (error !== 'cancel') {
+      console.error('删除标签失败:', error)
       ElMessage.error('删除失败')
     }
   }
