@@ -77,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete } from '@element-plus/icons-vue'
 import request from '@/api/request'
@@ -98,6 +98,9 @@ const tagForm = reactive({
   description: ''
 })
 
+// 组件卸载标志
+const isUnmounted = ref(false)
+
 // 验证规则
 const rules = {
   name: [
@@ -108,16 +111,25 @@ const rules = {
 
 // 获取标签列表
 const fetchTags = async () => {
+  if (isUnmounted.value) return
+
   try {
     loading.value = true
     const response = await request.get('/tags')
+
+    // 检查组件是否已卸载
+    if (isUnmounted.value) return
+
     tags.value = response.data || []
     total.value = tags.value.length
   } catch (error) {
+    if (isUnmounted.value) return
     console.error('获取标签列表失败:', error)
     ElMessage.error('获取标签列表失败')
   } finally {
-    loading.value = false
+    if (!isUnmounted.value) {
+      loading.value = false
+    }
   }
 }
 
@@ -214,6 +226,11 @@ const handleCurrentChange = (newPage) => {
 // 初始化
 onMounted(() => {
   fetchTags()
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  isUnmounted.value = true
 })
 </script>
 

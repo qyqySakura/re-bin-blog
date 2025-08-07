@@ -9,7 +9,9 @@ import llf.llf.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/comments")
@@ -45,10 +47,36 @@ public class CommentController {
         }
     }
 
-    // 查询所有评论
+    // 查询所有评论（支持分页和筛选）
     @GetMapping
-    public Result<List<Comment>> getAllComments() {
-        return Result.success(commentService.selectAll());
+    public Result<Map<String, Object>> getAllComments(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword) {
+
+        try {
+            // 计算偏移量
+            int offset = (page - 1) * size;
+
+            // 获取评论列表
+            List<Comment> comments = commentService.selectWithPagination(offset, size, status, keyword);
+
+            // 获取总数
+            int total = commentService.countWithFilter(status, keyword);
+
+            // 构建返回结果
+            Map<String, Object> result = new HashMap<>();
+            result.put("data", comments);
+            result.put("total", total);
+            result.put("page", page);
+            result.put("size", size);
+
+            return Result.success(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "获取评论列表失败");
+        }
     }
 
     // 根据ID查询评论

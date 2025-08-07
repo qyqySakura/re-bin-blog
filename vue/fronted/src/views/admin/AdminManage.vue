@@ -126,7 +126,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Refresh, Edit, Delete } from '@element-plus/icons-vue'
 import { adminApi } from '@/api/modules/admin'
@@ -146,6 +146,9 @@ const editingAdmin = ref({
   newPassword: ''
 })
 
+// 组件卸载标志
+const isUnmounted = ref(false)
+
 // 表单验证规则
 const formRules = {
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
@@ -164,18 +167,27 @@ const formRef = ref()
 
 // 获取管理员列表
 const fetchAdmins = async () => {
+  if (isUnmounted.value) return
+
   loading.value = true
   try {
     console.log('开始获取管理员列表...')
     const response = await adminApi.getAllAdmins()
     console.log('管理员列表响应:', response)
+
+    // 检查组件是否已卸载
+    if (isUnmounted.value) return
+
     admins.value = response.data || []
     console.log('管理员数据:', admins.value)
   } catch (error) {
+    if (isUnmounted.value) return
     console.error('获取管理员列表失败:', error)
     ElMessage.error('获取管理员列表失败: ' + (error.message || '未知错误'))
   } finally {
-    loading.value = false
+    if (!isUnmounted.value) {
+      loading.value = false
+    }
   }
 }
 
@@ -274,6 +286,11 @@ const formatTime = (timeStr) => {
 // 初始化
 onMounted(() => {
   fetchAdmins()
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  isUnmounted.value = true
 })
 </script>
 

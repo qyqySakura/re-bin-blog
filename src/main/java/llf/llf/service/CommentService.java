@@ -28,4 +28,10 @@ public interface CommentService {
 
     // 删除文章的所有评论
     int deleteByPostId(Integer postId);
+
+    // 分页查询评论（支持状态和关键词筛选）
+    List<Comment> selectWithPagination(int offset, int size, String status, String keyword);
+
+    // 获取筛选后的评论总数
+    int countWithFilter(String status, String keyword);
 }

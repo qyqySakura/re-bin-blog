@@ -105,4 +105,41 @@
         UPDATE comment SET like_count = #{likeCount} WHERE id = #{commentId}
     </update>
 
+    <!-- 分页查询评论（支持状态和关键词筛选） -->
+    <select id="selectWithPagination" resultMap="CommentWithUserMap">
+        SELECT c.*,
+               u.name as user_name, u.username as user_username, u.avatar as user_avatar,
+               ru.name as reply_to_user_name, ru.username as reply_to_user_username, ru.avatar as reply_to_user_avatar
+        FROM comment c
+        LEFT JOIN user u ON c.user_id = u.id
+        LEFT JOIN user ru ON c.reply_to_user_id = ru.id
+        WHERE 1=1
+        <if test="status != null and status != ''">
+            AND c.status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (c.content LIKE CONCAT('%', #{keyword}, '%')
+                 OR u.name LIKE CONCAT('%', #{keyword}, '%')
+                 OR u.username LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY c.create_time DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <!-- 获取筛选后的评论总数 -->
+    <select id="countWithFilter" resultType="int">
+        SELECT COUNT(*)
+        FROM comment c
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE 1=1
+        <if test="status != null and status != ''">
+            AND c.status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (c.content LIKE CONCAT('%', #{keyword}, '%')
+                 OR u.name LIKE CONCAT('%', #{keyword}, '%')
+                 OR u.username LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
 </mapper>

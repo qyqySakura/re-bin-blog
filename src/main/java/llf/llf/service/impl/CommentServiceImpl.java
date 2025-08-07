@@ -88,4 +88,14 @@ public class CommentServiceImpl implements CommentService {
     public int deleteByPostId(Integer postId) {
         return commentMapper.deleteByPostId(postId);
     }
+
+    @Override
+    public List<Comment> selectWithPagination(int offset, int size, String status, String keyword) {
+        return commentMapper.selectWithPagination(offset, size, status, keyword);
+    }
+
+    @Override
+    public int countWithFilter(String status, String keyword) {
+        return commentMapper.countWithFilter(status, keyword);
+    }
 }

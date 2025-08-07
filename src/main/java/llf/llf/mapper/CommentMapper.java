@@ -31,4 +31,11 @@ public interface CommentMapper extends BaseMapper<Comment> {
 
     // 更新评论点赞数量
     int updateLikeCount(@Param("commentId") Integer commentId, @Param("likeCount") Integer likeCount);
+
+    // 分页查询评论（支持状态和关键词筛选）
+    List<Comment> selectWithPagination(@Param("offset") int offset, @Param("size") int size,
+                                     @Param("status") String status, @Param("keyword") String keyword);
+
+    // 获取筛选后的评论总数
+    int countWithFilter(@Param("status") String status, @Param("keyword") String keyword);
 }

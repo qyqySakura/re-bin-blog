@@ -148,7 +148,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Edit, Delete, Lock, Unlock } from '@element-plus/icons-vue'
 import { adminApi } from '@/api/modules/admin'
@@ -167,6 +167,9 @@ const editingUser = ref({
   email: '',
   status: 1
 })
+
+// 组件卸载标志
+const isUnmounted = ref(false)
 
 // 表单验证规则
 const formRules = {
@@ -192,18 +195,27 @@ const filteredUsers = computed(() => {
 
 // 获取用户列表
 const fetchUsers = async () => {
+  if (isUnmounted.value) return
+
   loading.value = true
   try {
     console.log('开始获取用户列表...')
     const response = await adminApi.getUsers()
     console.log('用户列表响应:', response)
+
+    // 检查组件是否已卸载
+    if (isUnmounted.value) return
+
     users.value = response.data || []
     console.log('用户数据:', users.value)
   } catch (error) {
+    if (isUnmounted.value) return
     console.error('获取用户列表失败:', error)
     ElMessage.error('获取用户列表失败: ' + (error.message || '未知错误'))
   } finally {
-    loading.value = false
+    if (!isUnmounted.value) {
+      loading.value = false
+    }
   }
 }
 
@@ -303,6 +315,11 @@ const formatTime = (timeStr) => {
 // 初始化
 onMounted(() => {
   fetchUsers()
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  isUnmounted.value = true
 })
 </script>
 

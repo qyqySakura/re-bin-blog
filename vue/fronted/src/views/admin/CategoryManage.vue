@@ -57,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, onUnmounted, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { categoryApi } from '@/utils/api'
@@ -68,6 +68,9 @@ const submitting = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const categories = ref([])
+
+// 组件卸载标志
+const isUnmounted = ref(false)
 
 // 分类表单
 const categoryForm = reactive({

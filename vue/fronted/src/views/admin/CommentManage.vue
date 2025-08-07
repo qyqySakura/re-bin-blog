@@ -93,11 +93,12 @@
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
           :total="total"
-          :page-sizes="[10, 20, 50]"
+          :page-sizes="[5, 10, 20, 50, 100]"
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           background
+          class="pagination-component"
         />
       </div>
     </div>
@@ -105,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Check, Close, Delete } from '@element-plus/icons-vue'
 import request from '@/api/request'
@@ -119,8 +120,13 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
+// 组件卸载标志
+const isUnmounted = ref(false)
+
 // 获取评论列表
 const fetchComments = async () => {
+  if (isUnmounted.value) return
+
   try {
     loading.value = true
     const response = await request.get('/comments', {
@@ -131,13 +137,60 @@ const fetchComments = async () => {
         size: pageSize.value
       }
     })
-    comments.value = response.data || []
-    total.value = comments.value.length
+
+    // 检查组件是否已卸载
+    if (isUnmounted.value) return
+
+    console.log('原始响应数据:', response)
+
+    // 处理不同的数据结构
+    let commentsData = []
+    let totalCount = 0
+
+    if (response.data) {
+      // 新的分页结构：{ data: { data: [...], total: 100 } }
+      if (response.data.data && Array.isArray(response.data.data)) {
+        commentsData = response.data.data
+        totalCount = response.data.total || 0
+        console.log('使用新的分页数据结构')
+      }
+      // 旧的直接数组结构：{ data: [...] }
+      else if (Array.isArray(response.data)) {
+        commentsData = response.data
+        totalCount = response.data.length
+        console.log('使用旧的数组数据结构')
+      }
+      // 其他情况
+      else {
+        console.warn('未知的数据结构:', response.data)
+        commentsData = []
+        totalCount = 0
+      }
+    }
+
+    comments.value = commentsData
+    total.value = totalCount
+
+    console.log('最终设置的数据:', {
+      comments: comments.value,
+      total: total.value,
+      isArray: Array.isArray(comments.value)
+    })
+
+    console.log('评论列表数据:', {
+      comments: comments.value.length,
+      total: total.value,
+      page: currentPage.value,
+      size: pageSize.value
+    })
   } catch (error) {
+    if (isUnmounted.value) return
     console.error('获取评论列表失败:', error)
     ElMessage.error('获取评论列表失败')
   } finally {
-    loading.value = false
+    if (!isUnmounted.value) {
+      loading.value = false
+    }
   }
 }
 
@@ -238,6 +291,11 @@ const handleCurrentChange = (newPage) => {
 onMounted(() => {
   fetchComments()
 })
+
+// 组件卸载时清理
+onUnmounted(() => {
+  isUnmounted.value = true
+})
 </script>
 
 <style scoped>
@@ -289,6 +347,34 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: center;
+}
+
+.pagination-component {
+  padding: 20px 0;
+}
+
+/* 分页组件样式优化 */
+.pagination-component .el-pagination__total {
+  color: #606266;
+  font-weight: 500;
+}
+
+.pagination-component .el-pagination__sizes {
+  margin-right: 20px;
+}
+
+.pagination-component .el-select .el-input {
+  width: 120px;
+}
+
+.pagination-component .el-pagination__jump {
+  margin-left: 20px;
+  color: #606266;
+}
+
+.pagination-component .el-input__inner {
+  width: 60px;
+  text-align: center;
 }
 
 /* 响应式设计 */
